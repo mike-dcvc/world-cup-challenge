@@ -469,17 +469,33 @@ function setMe(key){ ME = key; localStorage.setItem('dvwcc_me', key); }
 // ══════════════════════════════════════════════════════════
 //  API HELPERS
 // ══════════════════════════════════════════════════════════
-async function apiGet(params){
+// Apps Script requires: no custom headers, redirect:follow, GET for all calls.
+// We send all data (reads and writes) as GET with a single encoded param.
+// For writes, we chunk large payloads to stay under URL length limits.
+async function apiCall(params){
   const url = API_URL + '?' + new URLSearchParams(params);
-  const res = await fetch(url);
-  return res.json();
+  const res = await fetch(url, { redirect: 'follow' });
+  const text = await res.text();
+  // Strip any leading BOM or whitespace Google sometimes adds
+  const clean = text.trim().replace(/^\uFEFF/, '');
+  try {
+    return JSON.parse(clean);
+  } catch(e) {
+    console.error('API parse error. Raw response:', text.substring(0, 300));
+    throw new Error('Server returned unexpected response. See console for details.');
+  }
+}
+async function apiGet(params){
+  return apiCall(params);
 }
 async function apiPost(body){
-  // Apps Script doesn't support CORS preflight (OPTIONS), so we route
-  // all writes through GET with a JSON-encoded payload parameter.
-  const url = API_URL + '?' + new URLSearchParams({payload: JSON.stringify(body)});
-  const res = await fetch(url);
-  return res.json();
+  // Flatten body into individual URL params — avoids URL length limits
+  // and sidesteps the CORS preflight that blocks JSON POST requests.
+  const params = { action: body.action };
+  Object.entries(body).forEach(([k,v]) => {
+    if (k !== 'action') params[k] = (typeof v === 'object') ? JSON.stringify(v) : String(v);
+  });
+  return apiCall(params);
 }
 function loading(show, msg='Loading…'){
   const el = document.getElementById('loading-overlay');
