@@ -333,6 +333,13 @@ select.fi option{background:var(--navy);color:#fff;}
         <p class="muted mb16">Award 1pt to each week's Slack trivia winner.</p>
         <div id="adm-trivia"></div>
       </div>
+      <div class="card mt16">
+        <div class="card-hd">🏟 Knockout Team Names</div>
+        <p class="muted mb16">As each round is determined, enter the actual team names here. The app will show these instead of the placeholder labels. Leave blank to keep the placeholder.</p>
+        <div class="phase-tabs" id="adm-ko-tabs"></div>
+        <div id="adm-ko-body"></div>
+      </div>
+
       <div class="card mt16"><div class="card-hd">⚠ Danger Zone</div>
         <p class="muted mb16">This only resets the local admin cache — no Sheet data is deleted.</p>
         <button class="btn btn-sm" style="background:rgba(213,0,87,.18);border:1px solid var(--magenta);color:var(--mg50);" onclick="clearAdminCache()">Clear Local Cache</button>
@@ -461,6 +468,7 @@ const GOLDEN_PHASES = [
 let STATE = {
   players:{}, roundStatus:{}, goldenPhaseStatus:{},
   predictions:{}, results:{}, goldenAnswers:{}, triviaBonus:{},
+  knockoutTeams:{},
   adminData: null,
 };
 let ME = localStorage.getItem('dvwcc_me') || null; // playerKey
@@ -521,9 +529,10 @@ async function init(){
   try {
     loading(true,'Loading Challenge…');
     const data = await apiGet({action:'getAll'});
-    STATE.players         = data.players         || {};
-    STATE.roundStatus     = data.roundStatus     || {};
+    STATE.players           = data.players           || {};
+    STATE.roundStatus       = data.roundStatus       || {};
     STATE.goldenPhaseStatus = data.goldenPhaseStatus || {};
+    STATE.knockoutTeams     = data.knockoutTeams     || {};
     // Seed defaults for any missing round statuses
     ROUNDS.forEach((r,i)=>{ if(!STATE.roundStatus[r.id]) STATE.roundStatus[r.id] = i===0?'open':'upcoming'; });
     GOLDEN_PHASES.forEach(p=>{ if(!STATE.goldenPhaseStatus[p.id]) STATE.goldenPhaseStatus[p.id]='open'; });
@@ -634,6 +643,13 @@ function renderPrizeTable(){
 // ══════════════════════════════════════════════════════════
 //  PREDICT VIEW
 // ══════════════════════════════════════════════════════════
+// Return real team name if set in KnockoutTeams sheet, else fall back to placeholder
+function resolveTeam(matchId, side, placeholder) {
+  const kt = STATE.knockoutTeams[matchId];
+  if (kt && kt[side] && kt[side].trim() !== '') return kt[side].trim();
+  return placeholder;
+}
+
 function renderPredictView(){
   if(!ME||!STATE.players[ME]){
     document.getElementById('pred-gate').style.display='block';
@@ -701,7 +717,7 @@ function renderPredRound(roundId){
       const pred=myPreds[m.id]||{};
       const locked=st==='locked';
       html+=`<div class="mrow"><div class="mrow-info">
-        <div class="mteams">${m.home} <span style="color:var(--nv50);font-size:.78rem;">vs</span> ${m.away}</div>
+        <div class="mteams">${resolveTeam(m.id,'home',m.home)} <span style="color:var(--nv50);font-size:.78rem;">vs</span> ${resolveTeam(m.id,'away',m.away)}</div>
         <span class="mgbadge">${m.group}</span>${m.ko ? ` <span style="font-size:.68rem;color:rgba(255,255,255,.35);">🕐 ${m.ko} IST</span>` : ''}
         ${isGroup?`<div class="score-wrap">
           <input type="number" min="0" max="20" class="sc" id="sh-${m.id}" value="${pred.scoreH??''}" placeholder="?" ${locked?'disabled':''}
@@ -904,7 +920,7 @@ function renderMyResultsContent(){
       const resScoreStr=(res.scoreH!==undefined&&String(res.scoreH)!=='')?` (${res.scoreH}–${res.scoreA})`:'';
 
       html+=`<div class="mrow"><div class="mrow-info">
-        <div class="mteams" style="font-size:.84rem;">${m.home} vs ${m.away}</div>
+        <div class="mteams" style="font-size:.84rem;">${resolveTeam(m.id,'home',m.home)} vs ${resolveTeam(m.id,'away',m.away)}</div>
         ${m.ko ? `<div style="font-size:.68rem;color:rgba(255,255,255,.3);margin-bottom:2px;">🕐 ${m.ko} IST</div>` : ''}
         <div class="muted" style="font-size:.73rem;">Your pick: ${pLabel}${scoreStr} ${badge}</div>
         ${hasRes?`<div class="muted" style="font-size:.73rem;">Result: ${rLabel}${resScoreStr}</div>`:''}
@@ -930,13 +946,14 @@ async function adminLogin(){
   try{
     const data=await apiPost({action:'adminGetAll',password:ADMIN_PASSWORD});
     if(data.error){ loading(false); alert('Error: '+data.error); return; }
-    STATE.players         = data.players||{};
-    STATE.roundStatus     = data.roundStatus||{};
+    STATE.players           = data.players||{};
+    STATE.roundStatus       = data.roundStatus||{};
     STATE.goldenPhaseStatus = data.goldenPhaseStatus||{};
-    STATE.predictions     = data.predictions||{};
-    STATE.results         = data.results||{};
-    STATE.goldenAnswers   = data.goldenAnswers||{};
-    STATE.triviaBonus     = data.triviaBonus||{};
+    STATE.predictions       = data.predictions||{};
+    STATE.results           = data.results||{};
+    STATE.goldenAnswers     = data.goldenAnswers||{};
+    STATE.triviaBonus       = data.triviaBonus||{};
+    STATE.knockoutTeams     = data.knockoutTeams||{};
     adminUnlocked=true;
     document.getElementById('admin-lock').style.display='none';
     document.getElementById('admin-panel').style.display='block';
@@ -950,6 +967,7 @@ function renderAdminPanel(){
   renderAdminRounds();
   renderAdminResultTabs();
   renderAdminTrivia();
+  renderAdminKoTabs();
 }
 
 function renderAdminPlayers(){
@@ -1120,6 +1138,101 @@ async function adminAwardTrivia(weekIndex,playerKey){
   const data=await apiPost({action:'adminGetAll',password:ADMIN_PASSWORD});
   STATE.players=data.players||{};
   renderAdminPlayers();
+}
+
+// ── KNOCKOUT TEAM NAME EDITOR ──────────────────────────────
+const KO_ROUNDS = [
+  { id:'r32',   label:'Round of 32',    matches:[
+    {id:'r32m1',ph_h:'Group A Winner',ph_a:'Group B Runner-up'},
+    {id:'r32m2',ph_h:'Group B Winner',ph_a:'Group A Runner-up'},
+    {id:'r32m3',ph_h:'Group C Winner',ph_a:'Best 3rd (1)'},
+    {id:'r32m4',ph_h:'Group D Winner',ph_a:'Group G Runner-up'},
+    {id:'r32m5',ph_h:'Group E Winner',ph_a:'Best 3rd (2)'},
+    {id:'r32m6',ph_h:'Group F Winner',ph_a:'Best 3rd (3)'},
+    {id:'r32m7',ph_h:'Group G Winner',ph_a:'Group F Runner-up'},
+    {id:'r32m8',ph_h:'Group H Winner',ph_a:'Group J Runner-up'},
+    {id:'r32m9',ph_h:'Group I Winner',ph_a:'Group K Runner-up'},
+    {id:'r32m10',ph_h:'Group J Winner',ph_a:'Group H Runner-up'},
+    {id:'r32m11',ph_h:'Group K Winner',ph_a:'Best 3rd (4)'},
+    {id:'r32m12',ph_h:'Group L Winner',ph_a:'Group I Runner-up'},
+  ]},
+  { id:'r16', label:'Round of 16', matches:[
+    {id:'r16m1',ph_h:'R32 W1 Winner',ph_a:'R32 W2 Winner'},
+    {id:'r16m2',ph_h:'R32 W3 Winner',ph_a:'R32 W4 Winner'},
+    {id:'r16m3',ph_h:'R32 W5 Winner',ph_a:'R32 W6 Winner'},
+    {id:'r16m4',ph_h:'R32 W7 Winner',ph_a:'R32 W8 Winner'},
+    {id:'r16m5',ph_h:'R32 W9 Winner',ph_a:'R32 W10 Winner'},
+    {id:'r16m6',ph_h:'R32 W11 Winner',ph_a:'R32 W12 Winner'},
+  ]},
+  { id:'qf', label:'Quarter-Finals', matches:[
+    {id:'qfm1',ph_h:'R16 W1',ph_a:'R16 W2'},
+    {id:'qfm2',ph_h:'R16 W3',ph_a:'R16 W4'},
+    {id:'qfm3',ph_h:'R16 W5',ph_a:'R16 W6'},
+  ]},
+  { id:'sf', label:'Semi-Finals', matches:[
+    {id:'sfm1',ph_h:'QF1 Winner',ph_a:'QF2 Winner'},
+    {id:'sfm2',ph_h:'QF3 Winner',ph_a:'Remaining QF Winner'},
+  ]},
+  { id:'final', label:'The Final', matches:[
+    {id:'finalm1',ph_h:'SF1 Winner',ph_a:'SF2 Winner'},
+  ]},
+];
+
+let activeKoTab = 'r32';
+
+function renderAdminKoTabs(){
+  const tabsEl = document.getElementById('adm-ko-tabs');
+  if (!tabsEl) return;
+  tabsEl.innerHTML = '';
+  KO_ROUNDS.forEach((r,i) => {
+    const btn = document.createElement('button');
+    btn.className = 'pt' + (i===0?' active':'');
+    btn.textContent = r.label;
+    btn.onclick = () => {
+      document.querySelectorAll('#adm-ko-tabs .pt').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      activeKoTab = r.id;
+      renderAdminKoBody(r.id);
+    };
+    tabsEl.appendChild(btn);
+  });
+  renderAdminKoBody('r32');
+}
+
+function renderAdminKoBody(roundId){
+  const round = KO_ROUNDS.find(r=>r.id===roundId);
+  const el = document.getElementById('adm-ko-body');
+  let html = `<p class="muted mb16" style="font-size:.8rem;">Enter team names as they become known. Leave blank to keep the placeholder label. Changes save automatically and appear immediately in the app for all users.</p>`;
+  round.matches.forEach(m => {
+    const kt = STATE.knockoutTeams[m.id] || {};
+    html += `<div class="rir" style="align-items:center;gap:10px;flex-wrap:wrap;">
+      <div class="ml" style="min-width:80px;font-size:.75rem;color:var(--nv50);">${m.id}</div>
+      <input class="fi" style="flex:1;min-width:130px;font-size:.82rem;" placeholder="${m.ph_h}"
+        value="${kt.home||''}" oninput="saveKoTeam('${m.id}','home',this.value)">
+      <span style="color:var(--nv50);font-size:.8rem;">vs</span>
+      <input class="fi" style="flex:1;min-width:130px;font-size:.82rem;" placeholder="${m.ph_a}"
+        value="${kt.away||''}" oninput="saveKoTeam('${m.id}','away',this.value)">
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+// Debounce saves so rapid typing doesn't flood the API
+const koSaveTimers = {};
+function saveKoTeam(matchId, side, value){
+  if (!STATE.knockoutTeams[matchId]) STATE.knockoutTeams[matchId] = {};
+  STATE.knockoutTeams[matchId][side] = value;
+  clearTimeout(koSaveTimers[matchId]);
+  koSaveTimers[matchId] = setTimeout(async () => {
+    const kt = STATE.knockoutTeams[matchId];
+    await apiPost({
+      action: 'saveKnockoutTeam',
+      password: ADMIN_PASSWORD,
+      matchId,
+      home: kt.home || '',
+      away: kt.away || '',
+    });
+  }, 800); // wait 800ms after last keystroke before saving
 }
 
 function clearAdminCache(){
