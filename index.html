@@ -213,11 +213,12 @@ select.fi option{background:var(--navy);color:#fff;}
         <div class="card-hd">📋 Your Details</div>
         <div class="fg">
           <label class="fl">Your name</label>
-          <input class="fi" id="reg-name" type="text" placeholder="e.g. Siobhán Murphy">
+          <input class="fi" id="reg-name" type="text" placeholder="e.g. Mike Randall">
         </div>
         <div class="fg">
-          <label class="fl">Slack username</label>
-          <input class="fi" id="reg-slack" type="text" placeholder="e.g. siobhan.murphy">
+          <label class="fl">Work email address</label>
+          <input class="fi" id="reg-slack" type="email" placeholder="e.g. mike@volunteerdublincity.ie">
+          <p style="font-size:.75rem;color:rgba(255,255,255,.45);margin-top:5px;">This is used to @mention you in Slack when you win something 🏆</p>
         </div>
         <div id="reg-err" style="display:none;" class="banner bn-err mt8"></div>
         <button class="btn btn-primary btn-full mt8" id="reg-btn" onclick="registerPlayer()">Register →</button>
@@ -600,7 +601,7 @@ function showConfirmed(player){
   document.getElementById('confirm-card').innerHTML=`
     <div class="card-hd">🎉 Welcome, ${player.name}!</div>
     <div style="font-size:.88rem;line-height:1.8;">
-      <strong style="color:var(--light-blue)">Slack:</strong> @${player.slack||'—'}<br>
+      <strong style="color:var(--light-blue)">Email:</strong> ${player.slack||'—'}<br>
       <strong style="color:var(--light-blue)">Payment status:</strong> ${player.paid
         ? '<span style="color:var(--green)">✅ Confirmed</span>'
         : '⏳ Send €10 to Mike on Revolut (your name as reference)'}<br><br>
@@ -956,7 +957,7 @@ function renderAdminPlayers(){
   if(!players.length){ el.innerHTML='<p class="muted">No players yet.</p>'; return; }
   let html=`<table style="width:100%;font-size:.83rem;"><thead><tr>
     <th style="text-align:left;padding:5px 8px;color:var(--light-blue);font-size:.68rem;text-transform:uppercase;">Name</th>
-    <th style="text-align:left;padding:5px 8px;color:var(--light-blue);font-size:.68rem;text-transform:uppercase;">Slack</th>
+    <th style="text-align:left;padding:5px 8px;color:var(--light-blue);font-size:.68rem;text-transform:uppercase;">Email</th>
     <th style="text-align:left;padding:5px 8px;color:var(--light-blue);font-size:.68rem;text-transform:uppercase;">Paid</th>
     <th style="text-align:right;padding:5px 8px;color:var(--light-blue);font-size:.68rem;text-transform:uppercase;">Pts</th>
   </tr></thead><tbody>`;
@@ -964,7 +965,7 @@ function renderAdminPlayers(){
     const total=(p.pts||0)+(p.goldenPts||0)+(p.triviaBonus||0);
     html+=`<tr>
       <td style="padding:7px 8px;">${p.name}</td>
-      <td style="padding:7px 8px;color:var(--nv50);">@${p.slack||'—'}</td>
+      <td style="padding:7px 8px;color:var(--nv50);">${p.slack||'—'}</td>
       <td style="padding:7px 8px;">
         <label style="cursor:pointer;display:flex;align-items:center;gap:6px;">
           <input type="checkbox" ${p.paid?'checked':''} onchange="adminTogglePaid('${p.key}',this.checked)">
