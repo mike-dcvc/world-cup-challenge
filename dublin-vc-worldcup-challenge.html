@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dublin VCs World Cup Challenge 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+/* ─── PASTE YOUR APPS SCRIPT WEB APP URL BELOW ─── */
+/* See the constant API_URL near the top of the <script> section */
+
+:root {
+  --magenta:#D50057; --dark-blue:#410099; --light-blue:#6FCFEB;
+  --navy:#111C4E; --green:#00C08B; --light-green:#99E6D8;
+  --purple:#8B0078; --white:#fff;
+  --mg75:#E7567D; --mg50:#F492A5;
+  --db50:#9887BF; --nv50:#8483A2;
+  --surface:rgba(255,255,255,0.05);
+  --border:rgba(255,255,255,0.10);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',Arial,sans-serif;background:var(--navy);color:#fff;min-height:100vh;overflow-x:hidden;}
+
+/* HERO */
+.hero{background:var(--dark-blue);position:relative;overflow:hidden;padding:32px 24px 28px;text-align:center;}
+.hero::before{content:'';position:absolute;top:-80px;right:-80px;width:320px;height:320px;background:var(--magenta);border-radius:50%;opacity:.18;}
+.hero::after{content:'';position:absolute;bottom:-60px;left:-60px;width:220px;height:220px;background:var(--light-blue);border-radius:50%;opacity:.12;}
+.hero-title{font-family:'DM Serif Display',serif;font-size:clamp(1.6rem,5vw,2.8rem);line-height:1.1;color:#fff;position:relative;z-index:1;}
+.hero-title span{color:var(--light-blue);}
+.hero-sub{font-size:.88rem;color:var(--mg50);margin-top:6px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;position:relative;z-index:1;}
+.hero-badges{display:flex;justify-content:center;gap:12px;margin-top:14px;flex-wrap:wrap;position:relative;z-index:1;}
+.badge{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:4px 13px;font-size:.76rem;font-weight:700;color:var(--light-blue);}
+
+/* NAV */
+.nav{display:flex;background:var(--navy);border-bottom:2px solid var(--magenta);overflow-x:auto;scrollbar-width:none;}
+.nav::-webkit-scrollbar{display:none;}
+.nav-btn{flex:1;min-width:80px;padding:13px 8px;background:none;border:none;color:var(--nv50);font-family:'DM Sans',sans-serif;font-size:.76rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:color .2s;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;}
+.nav-btn:hover{color:#fff;}
+.nav-btn.active{color:var(--magenta);border-bottom-color:var(--magenta);}
+.nav-btn.admin-tab{color:var(--light-blue);}
+.nav-btn.admin-tab.active{color:var(--light-blue);border-bottom-color:var(--light-blue);}
+
+/* MAIN */
+.main{padding:22px 16px;max-width:760px;margin:0 auto;}
+.view{display:none;}.view.active{display:block;}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;}
+.card-hd{font-family:'DM Serif Display',serif;font-size:1.2rem;color:var(--light-blue);margin-bottom:14px;}
+
+/* FORMS */
+.fg{margin-bottom:13px;}
+.fl{display:block;font-size:.76rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--light-blue);margin-bottom:5px;}
+.fi{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:10px 14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:.93rem;transition:border-color .2s;}
+.fi:focus{outline:none;border-color:var(--magenta);}
+.fi::placeholder{color:rgba(255,255,255,.3);}
+select.fi option{background:var(--navy);color:#fff;}
+
+/* BUTTONS */
+.btn{display:inline-block;padding:11px 22px;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.88rem;letter-spacing:.04em;cursor:pointer;border:none;transition:all .2s;text-transform:uppercase;}
+.btn-primary{background:var(--magenta);color:#fff;}.btn-primary:hover{background:var(--mg75);}
+.btn-secondary{background:transparent;color:var(--light-blue);border:2px solid var(--light-blue);}.btn-secondary:hover{background:rgba(111,207,235,.1);}
+.btn-success{background:var(--green);color:var(--navy);}.btn-success:hover{opacity:.85;}
+.btn-sm{padding:6px 13px;font-size:.75rem;}
+.btn-full{width:100%;text-align:center;}
+.mt8{margin-top:8px;}.mt16{margin-top:16px;}.mb16{margin-bottom:16px;}
+
+/* BANNERS */
+.banner{border-radius:8px;padding:11px 15px;margin-bottom:14px;font-size:.86rem;font-weight:500;display:flex;align-items:flex-start;gap:9px;line-height:1.4;}
+.bn-info{background:rgba(111,207,235,.1);border:1px solid rgba(111,207,235,.3);color:var(--light-blue);}
+.bn-ok{background:rgba(0,192,139,.1);border:1px solid rgba(0,192,139,.3);color:var(--light-green);}
+.bn-warn{background:rgba(213,0,87,.1);border:1px solid rgba(213,0,87,.3);color:var(--mg50);}
+.bn-err{background:rgba(213,0,87,.2);border:1px solid var(--magenta);color:#fff;}
+
+/* SECTION LABELS */
+.sec-lbl{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--magenta);margin-bottom:5px;display:flex;align-items:center;gap:8px;}
+.sec-lbl::after{content:'';flex:1;height:1px;background:rgba(213,0,87,.3);}
+.sec-ttl{font-family:'DM Serif Display',serif;font-size:1.4rem;color:#fff;margin-bottom:16px;}
+
+/* PHASE TABS */
+.phase-tabs{display:flex;gap:7px;margin-bottom:18px;flex-wrap:wrap;}
+.pt{padding:6px 13px;border-radius:20px;border:1px solid rgba(255,255,255,.15);background:none;color:rgba(255,255,255,.5);font-family:'DM Sans',sans-serif;font-size:.76rem;font-weight:700;letter-spacing:.04em;cursor:pointer;transition:all .2s;text-transform:uppercase;}
+.pt.active{background:var(--magenta);border-color:var(--magenta);color:#fff;}
+.pt:hover:not(.active){border-color:rgba(255,255,255,.35);color:rgba(255,255,255,.8);}
+
+/* MATCH ROWS */
+.mrow{display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06);}
+.mrow:last-child{border-bottom:none;}
+.mrow-info{flex:1;}
+.mteams{font-size:.9rem;font-weight:500;}
+.mgbadge{font-size:.67rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--nv50);background:rgba(255,255,255,.06);border-radius:4px;padding:2px 6px;}
+.pred-btns{display:flex;gap:5px;flex-shrink:0;}
+.pb{padding:6px 11px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);color:rgba(255,255,255,.55);font-family:'DM Sans',sans-serif;font-size:.76rem;font-weight:700;cursor:pointer;transition:all .2s;}
+.pb:hover{border-color:var(--light-blue);color:var(--light-blue);}
+.pb.sel-h{background:var(--magenta);border-color:var(--magenta);color:#fff;}
+.pb.sel-d{background:var(--dark-blue);border-color:var(--light-blue);color:var(--light-blue);}
+.pb.sel-a{background:var(--db50);border-color:var(--db50);color:#fff;}
+.pb.locked{opacity:.45;cursor:not-allowed;pointer-events:none;}
+.score-wrap{display:flex;align-items:center;gap:4px;margin-top:7px;}
+.sc{width:36px;text-align:center;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:5px;padding:4px;color:#fff;font-family:'DM Sans',sans-serif;font-size:.88rem;}
+.sc:focus{outline:none;border-color:var(--green);}
+.sc-sep{color:rgba(255,255,255,.4);font-weight:700;}
+
+/* LEADERBOARD */
+.lb-table{width:100%;border-collapse:collapse;}
+.lb-table th{font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--light-blue);padding:7px 9px;text-align:left;border-bottom:1px solid rgba(255,255,255,.1);}
+.lb-table td{padding:10px 9px;border-bottom:1px solid rgba(255,255,255,.05);font-size:.88rem;}
+.lb-table tr:hover td{background:rgba(255,255,255,.03);}
+.rk{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--nv50);width:34px;}
+.rk1 .rk{color:#FFD700;}.rk2 .rk{color:#C0C0C0;}.rk3 .rk{color:#CD7F32;}.rkl .rk{color:var(--magenta);}
+.pname{font-weight:700;}
+.pts-cell{font-family:'DM Serif Display',serif;font-size:1.2rem;color:var(--light-blue);text-align:right;}
+.pts-sub{font-size:.7rem;color:var(--green);display:block;}
+.pts-pill{display:inline-block;background:rgba(0,192,139,.18);color:var(--green);border-radius:10px;padding:1px 7px;font-size:.7rem;font-weight:700;}
+
+/* GOLDEN Qs */
+.gq{padding:13px 0;border-bottom:1px solid rgba(255,255,255,.07);}
+.gq:last-child{border-bottom:none;}
+.gq-q{font-size:.88rem;font-weight:500;margin-bottom:8px;line-height:1.45;}
+.gq-q .qn{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--magenta);margin-right:6px;}
+
+/* MY RESULTS */
+.res-badge{display:inline-block;padding:2px 8px;border-radius:5px;font-size:.7rem;font-weight:700;margin-left:5px;}
+.rb-ok{background:rgba(0,192,139,.18);color:var(--green);}
+.rb-bad{background:rgba(213,0,87,.15);color:var(--mg50);}
+.rb-pend{background:rgba(255,255,255,.07);color:var(--nv50);}
+
+/* REVOLUT BOX */
+.revolut{background:rgba(111,207,235,.07);border:1px solid rgba(111,207,235,.22);border-radius:10px;padding:16px;margin-top:16px;}
+.revolut h4{font-weight:700;color:var(--light-blue);font-size:.88rem;margin-bottom:7px;}
+.revolut p{font-size:.83rem;color:rgba(255,255,255,.7);line-height:1.55;}
+.revolut strong{color:#fff;}
+
+/* PRIZE */
+.prize-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.88rem;}
+.prize-row:last-child{border-bottom:none;}
+.prize-lbl{display:flex;align-items:center;gap:9px;}
+.p-emoji{font-size:1.15rem;width:26px;text-align:center;}
+.prize-amt{color:var(--green);font-family:'DM Serif Display',serif;font-size:1rem;}
+.prize-pct{color:var(--light-blue);font-weight:700;font-size:.82rem;margin-right:4px;}
+
+/* ADMIN */
+.admin-lk{text-align:center;padding:40px 20px;}
+.admin-lk h2{font-family:'DM Serif Display',serif;font-size:1.6rem;color:var(--light-blue);margin-bottom:8px;}
+.admin-lk p{color:var(--nv50);font-size:.88rem;margin-bottom:18px;}
+.rir{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06);flex-wrap:wrap;}
+.rir .ml{flex:1;min-width:150px;font-size:.86rem;}
+.rr-group{display:flex;gap:5px;}
+.rr{display:none;}
+.rrl{padding:5px 9px;border-radius:5px;border:1px solid rgba(255,255,255,.2);font-size:.73rem;font-weight:700;cursor:pointer;transition:all .2s;color:rgba(255,255,255,.5);}
+.rr.r-h:checked+.rrl{background:var(--magenta);border-color:var(--magenta);color:#fff;}
+.rr.r-d:checked+.rrl{background:var(--dark-blue);border-color:var(--light-blue);color:var(--light-blue);}
+.rr.r-a:checked+.rrl{background:var(--db50);border-color:var(--db50);color:#fff;}
+
+/* SPINNER */
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.2);border-top-color:var(--light-blue);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-overlay{position:fixed;inset:0;background:rgba(17,28,78,.7);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:12px;}
+.loading-overlay p{color:var(--light-blue);font-weight:700;font-size:.9rem;}
+
+/* MISC */
+.muted{color:rgba(255,255,255,.4);font-size:.82rem;}
+.flex-bw{display:flex;justify-content:space-between;align-items:center;}
+.pill{display:inline-block;padding:2px 9px;border-radius:10px;font-size:.7rem;font-weight:700;}
+.pill-open{background:rgba(0,192,139,.18);color:var(--green);}
+.pill-locked{background:rgba(255,255,255,.07);color:var(--nv50);}
+.pill-up{background:rgba(65,0,153,.35);color:var(--db50);}
+
+.footer{text-align:center;padding:22px 16px;font-size:.73rem;color:rgba(255,255,255,.2);border-top:1px solid rgba(255,255,255,.07);margin-top:16px;}
+.footer a{color:var(--light-blue);text-decoration:none;}
+
+@media(max-width:480px){
+  .pred-btns{flex-direction:column;}
+  .mrow{flex-wrap:wrap;}
+}
+</style>
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="spinner"></div>
+  <p>Loading Challenge…</p>
+</div>
+
+<div class="hero">
+  <div class="hero-title">Dublin VCs<br><span>World Cup Challenge</span><br>2026 🌍</div>
+  <div class="hero-sub">48 nations · 104 matches · one winner</div>
+  <div class="hero-badges">
+    <div class="badge">🗓 Jun 11 – Jul 19</div>
+    <div class="badge">💶 €10 entry</div>
+    <div class="badge">🏆 Prizes + Wooden Spoon 🧦</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="showView('enter')"       id="nav-enter">Enter</button>
+  <button class="nav-btn"        onclick="showView('predict')"     id="nav-predict">Predict</button>
+  <button class="nav-btn"        onclick="showView('golden')"      id="nav-golden">Golden Qs</button>
+  <button class="nav-btn"        onclick="showView('leaderboard')" id="nav-leaderboard">Leaderboard</button>
+  <button class="nav-btn"        onclick="showView('myresults')"   id="nav-myresults">My Results</button>
+  <button class="nav-btn admin-tab" onclick="showView('admin')"    id="nav-admin">⚙ Admin</button>
+</nav>
+
+<div class="main">
+
+  <!-- ══ ENTER ══ -->
+  <div class="view active" id="view-enter">
+    <div class="sec-lbl">Registration</div>
+    <div class="sec-ttl">Join the Challenge</div>
+    <div id="enter-form-wrap">
+      <div class="card">
+        <div class="card-hd">📋 Your Details</div>
+        <div class="fg">
+          <label class="fl">Your name</label>
+          <input class="fi" id="reg-name" type="text" placeholder="e.g. Siobhán Murphy">
+        </div>
+        <div class="fg">
+          <label class="fl">Slack username</label>
+          <input class="fi" id="reg-slack" type="text" placeholder="e.g. siobhan.murphy">
+        </div>
+        <div id="reg-err" style="display:none;" class="banner bn-err mt8"></div>
+        <button class="btn btn-primary btn-full mt8" id="reg-btn" onclick="registerPlayer()">Register →</button>
+      </div>
+      <div class="revolut">
+        <h4>💳 Pay your €10 entry fee via Revolut</h4>
+        <p>After registering, send <strong>€10</strong> to Mike on Revolut with your name as the reference. Your predictions count straight away, but your entry is only fully confirmed once Mike marks your payment. You'll see ✅ on the leaderboard when you're confirmed.</p>
+      </div>
+      <div class="card mt16">
+        <div class="card-hd">🏆 Prize Structure</div>
+        <div id="prize-table"></div>
+        <p class="muted mt8" style="font-size:.76rem;">Any remaining funds donated to <strong style="color:var(--light-blue)">Sports Against Racism Ireland</strong>.</p>
+      </div>
+      <div class="card mt16">
+        <div class="card-hd">📖 How Points Work</div>
+        <div style="font-size:.86rem;line-height:1.75;color:rgba(255,255,255,.75);">
+          <p><strong style="color:var(--light-blue)">Group Stage (Weeks 1–3):</strong><br>
+          ✅ Correct result (Win/Draw/Loss) = <span class="pts-pill">2 pts</span><br>
+          ✅ Correct result + exact scoreline = <span class="pts-pill">5 pts</span></p><br>
+          <p><strong style="color:var(--light-blue)">Knockout Rounds:</strong><br>
+          R32 <span class="pts-pill">4 pts</span> · R16 <span class="pts-pill">6 pts</span> · QF <span class="pts-pill">8 pts</span> · SF <span class="pts-pill">10 pts</span> · Final <span class="pts-pill">12 pts</span></p><br>
+          <p><strong style="color:var(--light-blue)">Golden Questions (3 phases):</strong><br>
+          Up to <span class="pts-pill">5 pts</span> each — no football knowledge needed!</p><br>
+          <p><strong style="color:var(--light-blue)">Weekly Slack Trivia:</strong> <span class="pts-pill">1 pt</span> per week</p>
+        </div>
+      </div>
+    </div>
+    <div id="enter-confirmed" style="display:none;">
+      <div class="banner bn-ok">✅ You're registered! Here are your details.</div>
+      <div class="card" id="confirm-card"></div>
+    </div>
+  </div>
+
+  <!-- ══ PREDICT ══ -->
+  <div class="view" id="view-predict">
+    <div class="sec-lbl">Predictions</div>
+    <div class="sec-ttl">Make Your Picks</div>
+    <div id="pred-gate">
+      <div class="banner bn-warn">⚠ Please enter your registered name to see your predictions.</div>
+      <div class="fg"><label class="fl">Your registered name</label>
+        <input class="fi" id="pred-name-in" placeholder="Your name" type="text">
+        <button class="btn btn-secondary mt8" onclick="gateLogin('pred')">Continue →</button>
+      </div>
+    </div>
+    <div id="pred-content" style="display:none;">
+      <div class="phase-tabs" id="pred-tabs"></div>
+      <div id="pred-body"></div>
+    </div>
+  </div>
+
+  <!-- ══ GOLDEN ══ -->
+  <div class="view" id="view-golden">
+    <div class="sec-lbl">Bonus Points</div>
+    <div class="sec-ttl">Golden Questions</div>
+    <div class="banner bn-info">💡 No football knowledge required — lateral thinking and luck welcome.</div>
+    <div id="golden-gate">
+      <div class="fg mt16"><label class="fl">Your registered name</label>
+        <input class="fi" id="golden-name-in" placeholder="Your name" type="text">
+        <button class="btn btn-secondary mt8" onclick="gateLogin('golden')">Continue →</button>
+      </div>
+    </div>
+    <div id="golden-content" style="display:none;"></div>
+  </div>
+
+  <!-- ══ LEADERBOARD ══ -->
+  <div class="view" id="view-leaderboard">
+    <div class="sec-lbl">Standings</div>
+    <div class="sec-ttl">Leaderboard</div>
+    <div id="lb-content"></div>
+  </div>
+
+  <!-- ══ MY RESULTS ══ -->
+  <div class="view" id="view-myresults">
+    <div class="sec-lbl">Your Performance</div>
+    <div class="sec-ttl">My Results</div>
+    <div id="mr-gate">
+      <div class="fg"><label class="fl">Your registered name</label>
+        <input class="fi" id="mr-name-in" placeholder="Your name" type="text">
+        <button class="btn btn-secondary mt8" onclick="gateLogin('mr')">View My Results →</button>
+      </div>
+    </div>
+    <div id="mr-content" style="display:none;"></div>
+  </div>
+
+  <!-- ══ ADMIN ══ -->
+  <div class="view" id="view-admin">
+    <div id="admin-lock">
+      <div class="admin-lk">
+        <h2>⚙ Admin Panel</h2>
+        <p>Enter the admin password to manage results, rounds, and payments.</p>
+        <div class="fg"><input class="fi" id="adm-pw" type="password" placeholder="Password" style="max-width:260px;margin:0 auto;"></div>
+        <button class="btn btn-secondary mt8" onclick="adminLogin()">Unlock →</button>
+        <div id="adm-err" style="display:none;" class="banner bn-err mt8" style="max-width:300px;margin:10px auto 0;"></div>
+      </div>
+    </div>
+    <div id="admin-panel" style="display:none;">
+      <div class="sec-lbl">Admin</div>
+      <div class="sec-ttl">⚙ Tournament Management</div>
+      <div class="card"><div class="card-hd">👥 Players & Payments</div><div id="adm-players"></div></div>
+      <div class="card mt16"><div class="card-hd">🔓 Round Management</div>
+        <p class="muted mb16">Open and lock prediction rounds and Golden Question phases.</p>
+        <div id="adm-rounds"></div>
+      </div>
+      <div class="card mt16"><div class="card-hd">📊 Match Results</div>
+        <p class="muted mb16">Enter actual results — then click Recalculate to update all scores.</p>
+        <div class="phase-tabs" id="adm-res-tabs"></div>
+        <div id="adm-res-body"></div>
+        <button class="btn btn-success mt16" onclick="recalcPoints()">🔄 Recalculate All Points</button>
+        <div id="recalc-msg" style="display:none;" class="banner bn-ok mt8"></div>
+      </div>
+      <div class="card mt16"><div class="card-hd">🏅 Weekly Trivia Points</div>
+        <p class="muted mb16">Award 1pt to each week's Slack trivia winner.</p>
+        <div id="adm-trivia"></div>
+      </div>
+      <div class="card mt16"><div class="card-hd">⚠ Danger Zone</div>
+        <p class="muted mb16">This only resets the local admin cache — no Sheet data is deleted.</p>
+        <button class="btn btn-sm" style="background:rgba(213,0,87,.18);border:1px solid var(--magenta);color:var(--mg50);" onclick="clearAdminCache()">Clear Local Cache</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<div class="footer">
+  Dublin VCs World Cup Challenge 2026 · <a href="https://volunteerdublincity.ie">Dublin City Volunteer Centre</a> ·
+  Surplus donated to <a href="https://www.sari.ie">Sports Against Racism Ireland</a>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+//  ★ CONFIGURATION — paste your Apps Script URL here ★
+// ══════════════════════════════════════════════════════════
+const API_URL = 'https://script.google.com/macros/s/AKfycbw3CZoN3dJITeYZUk6EgXBmGihETHLVmRHyxMYQMrFM3Nw7IFhd2NKpTdjlqmwIcj6r/exec';
+const ADMIN_PASSWORD = 'dcvc2026';
+
+// ══════════════════════════════════════════════════════════
+//  DATA DEFINITIONS
+// ══════════════════════════════════════════════════════════
+const ROUNDS = [
+  { id:'w1',    label:'Week 1',         sublabel:'Jun 11–13 · Lock: Fri 13 Jun midnight', type:'group',    pts:2, bonusPts:3,
+    matches:[
+      {id:'w1m1',home:'🇲🇽 Mexico',away:'🇿🇦 South Africa',group:'A'},
+      {id:'w1m2',home:'🇧🇷 Brazil',away:'🇲🇦 Morocco',group:'C'},
+      {id:'w1m3',home:'🇭🇹 Haiti',away:'🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland',group:'C'},
+      {id:'w1m4',home:'🇺🇸 USA',away:'🇵🇾 Paraguay',group:'D'},
+      {id:'w1m5',home:'🇩🇪 Germany',away:"🇨🇮 Côte d'Ivoire",group:'E'},
+      {id:'w1m6',home:'🇳🇱 Netherlands',away:'🇯🇵 Japan',group:'F'},
+      {id:'w1m7',home:'🇪🇸 Spain',away:'🇨🇻 Cabo Verde',group:'H'},
+    ]},
+  { id:'w2',    label:'Week 2',         sublabel:'Jun 16–18 · Lock: Fri 20 Jun midnight', type:'group',    pts:2, bonusPts:3,
+    matches:[
+      {id:'w2m1',home:'🇫🇷 France',away:'🇸🇳 Senegal',group:'I'},
+      {id:'w2m2',home:'🇦🇷 Argentina',away:'🇩🇿 Algeria',group:'J'},
+      {id:'w2m3',home:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',away:'🇭🇷 Croatia',group:'L'},
+      {id:'w2m4',home:'🇵🇹 Portugal',away:'🇨🇩 DR Congo',group:'K'},
+      {id:'w2m5',home:'🇧🇪 Belgium',away:'🇪🇬 Egypt',group:'G'},
+      {id:'w2m6',home:'🇺🇾 Uruguay',away:'🇸🇦 Saudi Arabia',group:'H'},
+      {id:'w2m7',home:'🇯🇵 Japan',away:'🇸🇪 Sweden',group:'F'},
+    ]},
+  { id:'w3',    label:'Week 3',         sublabel:'Jun 22–27 · Lock: Fri 27 Jun midnight', type:'group',    pts:2, bonusPts:3,
+    matches:[
+      {id:'w3m1',home:'🇧🇷 Brazil',away:'🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland',group:'C'},
+      {id:'w3m2',home:'🇩🇪 Germany',away:'🇪🇨 Ecuador',group:'E'},
+      {id:'w3m3',home:'🇦🇷 Argentina',away:'🇦🇹 Austria',group:'J'},
+      {id:'w3m4',home:'🇫🇷 France',away:'🇳🇴 Norway',group:'I'},
+      {id:'w3m5',home:'🇪🇸 Spain',away:'🇺🇾 Uruguay',group:'H'},
+      {id:'w3m6',home:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',away:'🇬🇭 Ghana',group:'L'},
+      {id:'w3m7',home:'🇵🇹 Portugal',away:'🇨🇴 Colombia',group:'K'},
+    ]},
+  { id:'r32',   label:'Round of 32',    sublabel:'Jun 28–Jul 3 · Lock before first match', type:'knockout', pts:4, bonusPts:0,
+    matches:[
+      {id:'r32m1',home:'Group A Winner',away:'Group B Runner-up',group:'R32'},
+      {id:'r32m2',home:'Group B Winner',away:'Group A Runner-up',group:'R32'},
+      {id:'r32m3',home:'Group C Winner',away:'Best 3rd (1)',group:'R32'},
+      {id:'r32m4',home:'Group D Winner',away:'Group G Runner-up',group:'R32'},
+      {id:'r32m5',home:'Group E Winner',away:'Best 3rd (2)',group:'R32'},
+      {id:'r32m6',home:'Group F Winner',away:'Best 3rd (3)',group:'R32'},
+      {id:'r32m7',home:'Group G Winner',away:'Group F Runner-up',group:'R32'},
+      {id:'r32m8',home:'Group H Winner',away:'Group J Runner-up',group:'R32'},
+      {id:'r32m9',home:'Group I Winner',away:'Group K Runner-up',group:'R32'},
+      {id:'r32m10',home:'Group J Winner',away:'Group H Runner-up',group:'R32'},
+      {id:'r32m11',home:'Group K Winner',away:'Best 3rd (4)',group:'R32'},
+      {id:'r32m12',home:'Group L Winner',away:'Group I Runner-up',group:'R32'},
+    ]},
+  { id:'r16',   label:'Round of 16',    sublabel:'Jul 4–7 · Lock before first match', type:'knockout', pts:6, bonusPts:0,
+    matches:[
+      {id:'r16m1',home:'R32 W1 Winner',away:'R32 W2 Winner',group:'R16'},
+      {id:'r16m2',home:'R32 W3 Winner',away:'R32 W4 Winner',group:'R16'},
+      {id:'r16m3',home:'R32 W5 Winner',away:'R32 W6 Winner',group:'R16'},
+      {id:'r16m4',home:'R32 W7 Winner',away:'R32 W8 Winner',group:'R16'},
+      {id:'r16m5',home:'R32 W9 Winner',away:'R32 W10 Winner',group:'R16'},
+      {id:'r16m6',home:'R32 W11 Winner',away:'R32 W12 Winner',group:'R16'},
+    ]},
+  { id:'qf',    label:'Quarter-Finals', sublabel:'Jul 9–11 · Lock before first match', type:'knockout', pts:8, bonusPts:0,
+    matches:[
+      {id:'qfm1',home:'QF1 — R16 W1',away:'R16 W2',group:'QF'},
+      {id:'qfm2',home:'QF2 — R16 W3',away:'R16 W4',group:'QF'},
+      {id:'qfm3',home:'QF3 — R16 W5',away:'R16 W6',group:'QF'},
+    ]},
+  { id:'sf',    label:'Semi-Finals',    sublabel:'Jul 14–15 · Lock before first match', type:'knockout', pts:10, bonusPts:0,
+    matches:[
+      {id:'sfm1',home:'SF1 — QF1 Winner',away:'QF2 Winner',group:'SF'},
+      {id:'sfm2',home:'SF2 — QF3 Winner',away:'Remaining QF Winner',group:'SF'},
+    ]},
+  { id:'final', label:'The Final 🏆',   sublabel:'Jul 19 · MetLife Stadium, NJ · Lock before kickoff', type:'knockout', pts:12, bonusPts:0,
+    matches:[
+      {id:'finalm1',home:'🏆 SF1 Winner',away:'SF2 Winner',group:'FINAL'},
+    ]},
+];
+
+const GOLDEN_PHASES = [
+  { id:'gp1', label:'Phase 1 — Before Jun 11', deadline:'Lock before tournament kick-off',
+    questions:[
+      {id:'gp1q1',text:'How many goals in total will be scored across the entire group stage (72 matches)? Closest without going over wins.',type:'number',pts:5},
+      {id:'gp1q2',text:'Which group will finish with the most combined goals across all 6 of its matches?',type:'select',options:['A','B','C','D','E','F','G','H','I','J','K','L'],pts:5},
+      {id:'gp1q3',text:'How many red cards will be shown in the entire group stage? Exact answer wins; ties broken by earliest entry.',type:'number',pts:5},
+      {id:'gp1q4',text:"True or False: At least one of the three host nations (USA, Mexico, Canada) will be eliminated in the group stage.",type:'select',options:['True','False'],pts:5},
+      {id:'gp1q5',text:"Which country will score the tournament's very first goal?",type:'select',options:['Mexico','South Africa','South Korea','Czechia','Canada','Bosnia & Herz.','Qatar','Switzerland','Brazil','Morocco','Haiti','Scotland','USA','Paraguay','Australia','Türkiye','Germany','Curaçao',"Côte d'Ivoire",'Ecuador','Netherlands','Japan','Sweden','Tunisia','Belgium','Egypt','IR Iran','New Zealand','Spain','Cabo Verde','Saudi Arabia','Uruguay','France','Senegal','Iraq','Norway','Argentina','Algeria','Austria','Jordan','Portugal','DR Congo','Uzbekistan','Colombia','England','Croatia','Ghana','Panama'],pts:5},
+    ]},
+  { id:'gp2', label:'Phase 2 — Before Jun 28', deadline:'Lock before Round of 32',
+    questions:[
+      {id:'gp2q1',text:'How many of the eight best third-place qualifiers will be European teams?',type:'select',options:['0','1','2','3','4','5'],pts:5},
+      {id:'gp2q2',text:'Will there be at least one penalty shootout in the Round of 32?',type:'select',options:['Yes','No'],pts:5},
+      {id:'gp2q3',text:'Which continent will have the most teams in the Quarter-Finals?',type:'select',options:['Europe','South America','North America / CONCACAF','Africa','Asia'],pts:5},
+      {id:'gp2q4',text:'Predict the exact score (after 90 mins) of any one Quarter-Final — name it QF1, QF2, or QF3 and give the scoreline. Exact = 5pts; correct result only = 2pts.',type:'text',pts:5},
+    ]},
+  { id:'gp3', label:'Phase 3 — Before Jul 14', deadline:'Lock before Semi-Finals',
+    questions:[
+      {id:'gp3q1',text:'Will the Final go to extra time?',type:'select',options:['Yes','No'],pts:5},
+      {id:'gp3q2',text:'How many goals will be scored across both Semi-Finals combined? Closest without going over wins.',type:'number',pts:5},
+      {id:'gp3q3',text:'Who will win the official FIFA Golden Boot (tournament top scorer)?',type:'select',options:['Kylian Mbappé (France)','Lionel Messi (Argentina)','Cristiano Ronaldo (Portugal)','Vinícius Jr. (Brazil)','Harry Kane (England)','Lautaro Martínez (Argentina)','Erling Haaland (Norway)','Rafael Leão (Portugal)','Bukayo Saka (England)','Pedri (Spain)','Rodri (Spain)','Other'],pts:5},
+      {id:'gp3q4',text:'Which nation will win the 2026 FIFA World Cup?',type:'select',options:['Argentina','France','Brazil','Spain','England','Germany','Portugal','Netherlands','Uruguay','Colombia','Morocco','Japan','USA','Mexico','Belgium','Other'],pts:5},
+      {id:'gp3q5',text:'What will the exact score be in the Final after 90 minutes? Exact = 5pts; correct result only = 2pts.',type:'text',pts:5},
+    ]},
+];
+
+// ══════════════════════════════════════════════════════════
+//  STATE  (in-memory cache + localStorage for session)
+// ══════════════════════════════════════════════════════════
+let STATE = {
+  players:{}, roundStatus:{}, goldenPhaseStatus:{},
+  predictions:{}, results:{}, goldenAnswers:{}, triviaBonus:{},
+  adminData: null,
+};
+let ME = localStorage.getItem('dvwcc_me') || null; // playerKey
+
+function setMe(key){ ME = key; localStorage.setItem('dvwcc_me', key); }
+
+// ══════════════════════════════════════════════════════════
+//  API HELPERS
+// ══════════════════════════════════════════════════════════
+async function apiGet(params){
+  const url = API_URL + '?' + new URLSearchParams(params);
+  const res = await fetch(url);
+  return res.json();
+}
+async function apiPost(body){
+  const res = await fetch(API_URL, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(body),
+  });
+  return res.json();
+}
+function loading(show, msg='Loading…'){
+  const el = document.getElementById('loading-overlay');
+  if(show){ el.querySelector('p').textContent = msg; el.style.display='flex'; }
+  else el.style.display='none';
+}
+
+// ══════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════
+async function init(){
+  // If API_URL not set, show a helpful message and stop
+  if(API_URL === 'PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE'){
+    document.getElementById('loading-overlay').innerHTML =
+      '<div style="background:rgba(17,28,78,.95);padding:32px;border-radius:12px;max-width:500px;text-align:center;">' +
+      '<p style="color:var(--light-blue);font-size:1.1rem;font-weight:700;margin-bottom:12px;">⚙ Setup Required</p>' +
+      '<p style="color:rgba(255,255,255,.7);font-size:.88rem;line-height:1.6;">Open this file, find the line <code style="color:var(--green)">const API_URL = \'PASTE_YOUR…\'</code> near the top of the script, and replace it with your Google Apps Script Web App URL.</p>' +
+      '</div>';
+    document.getElementById('loading-overlay').style.display='flex';
+    return;
+  }
+  try {
+    loading(true,'Loading Challenge…');
+    const data = await apiGet({action:'getAll'});
+    STATE.players         = data.players         || {};
+    STATE.roundStatus     = data.roundStatus     || {};
+    STATE.goldenPhaseStatus = data.goldenPhaseStatus || {};
+    // Seed defaults for any missing round statuses
+    ROUNDS.forEach((r,i)=>{ if(!STATE.roundStatus[r.id]) STATE.roundStatus[r.id] = i===0?'open':'upcoming'; });
+    GOLDEN_PHASES.forEach(p=>{ if(!STATE.goldenPhaseStatus[p.id]) STATE.goldenPhaseStatus[p.id]='open'; });
+
+    renderPrizeTable();
+
+    if(ME && STATE.players[ME]){
+      showConfirmed(STATE.players[ME]);
+    }
+    loading(false);
+  } catch(e){
+    loading(false);
+    document.getElementById('view-enter').insertAdjacentHTML('afterbegin',
+      `<div class="banner bn-err">⚠ Couldn't connect to the server. Check your API_URL or internet connection.<br><small>${e.message}</small></div>`);
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  NAV
+// ══════════════════════════════════════════════════════════
+function showView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  document.getElementById('nav-'+id).classList.add('active');
+  if(id==='leaderboard') renderLeaderboard();
+  if(id==='predict')     renderPredictView();
+  if(id==='golden')      renderGoldenView();
+  if(id==='myresults')   renderMyResultsView();
+  if(id==='enter')       renderPrizeTable();
+}
+
+// ══════════════════════════════════════════════════════════
+//  GATE LOGIN (shared for predict / golden / my results)
+// ══════════════════════════════════════════════════════════
+function gateLogin(section){
+  const inputId = {pred:'pred-name-in', golden:'golden-name-in', mr:'mr-name-in'}[section];
+  const name = document.getElementById(inputId).value.trim();
+  const key = name.toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'');
+  if(!STATE.players[key]){ alert('Name not found — please check your spelling or register first.'); return; }
+  setMe(key);
+  if(section==='pred')   renderPredictView();
+  if(section==='golden') renderGoldenView();
+  if(section==='mr')     renderMyResultsView();
+}
+
+// ══════════════════════════════════════════════════════════
+//  ENTRY / REGISTRATION
+// ══════════════════════════════════════════════════════════
+async function registerPlayer(){
+  const name  = document.getElementById('reg-name').value.trim();
+  const slack = document.getElementById('reg-slack').value.trim();
+  const errEl = document.getElementById('reg-err');
+  const btn   = document.getElementById('reg-btn');
+  errEl.style.display='none';
+  if(!name){ errEl.textContent='Please enter your name.'; errEl.style.display='flex'; return; }
+  btn.disabled=true; btn.textContent='Registering…';
+  try{
+    const res = await apiPost({action:'register', name, slack});
+    if(res.error){ errEl.textContent=res.error; errEl.style.display='flex'; btn.disabled=false; btn.textContent='Register →'; return; }
+    STATE.players[res.player.key] = res.player;
+    setMe(res.player.key);
+    renderPrizeTable();
+    showConfirmed(res.player);
+  } catch(e){
+    errEl.textContent='Connection error — please try again.';
+    errEl.style.display='flex';
+  }
+  btn.disabled=false; btn.textContent='Register →';
+}
+
+function showConfirmed(player){
+  document.getElementById('enter-form-wrap').style.display='none';
+  document.getElementById('enter-confirmed').style.display='block';
+  document.getElementById('confirm-card').innerHTML=`
+    <div class="card-hd">🎉 Welcome, ${player.name}!</div>
+    <div style="font-size:.88rem;line-height:1.8;">
+      <strong style="color:var(--light-blue)">Slack:</strong> @${player.slack||'—'}<br>
+      <strong style="color:var(--light-blue)">Payment status:</strong> ${player.paid
+        ? '<span style="color:var(--green)">✅ Confirmed</span>'
+        : '⏳ Send €10 to Mike on Revolut (your name as reference)'}<br><br>
+      Head to <strong>Predict</strong> for your weekly picks, and <strong>Golden Qs</strong> for the bonus questions — both need to be in before 11 June!
+    </div>`;
+}
+
+function renderPrizeTable(){
+  const count = Object.values(STATE.players).filter(p=>p.paid).length;
+  const total = Object.keys(STATE.players).length;
+  const pot   = total * 10;
+  const rows  = [
+    {emoji:'🥇',label:'1st Place',pct:40},
+    {emoji:'🥈',label:'2nd Place',pct:20},
+    {emoji:'🥉',label:'3rd Place',pct:10},
+    {emoji:'👢',label:'Golden Boot (best knockout score)',pct:10},
+    {emoji:'🧦',label:'Wooden Spoon (last place) — special socks!',pct:0,fixed:'Special socks 🧦'},
+    {emoji:'🌍',label:'Sports Against Racism Ireland (remainder)',pct:0,fixed:'Remainder'},
+  ];
+  let html=`<p class="muted mb16" style="font-size:.8rem;">Pot: <strong style="color:var(--green)">€${pot}</strong> (${total} registered · ${count} paid)</p>`;
+  rows.forEach(r=>{
+    const amt = r.pct ? `€${Math.floor(pot*r.pct/100)}` : r.fixed;
+    html+=`<div class="prize-row"><div class="prize-lbl"><span class="p-emoji">${r.emoji}</span>${r.label}</div>
+      <div>${r.pct?`<span class="prize-pct">${r.pct}%</span>`:''}<span class="prize-amt">${amt}</span></div></div>`;
+  });
+  const el=document.getElementById('prize-table');
+  if(el) el.innerHTML=html;
+}
+
+// ══════════════════════════════════════════════════════════
+//  PREDICT VIEW
+// ══════════════════════════════════════════════════════════
+function renderPredictView(){
+  if(!ME||!STATE.players[ME]){
+    document.getElementById('pred-gate').style.display='block';
+    document.getElementById('pred-content').style.display='none';
+    return;
+  }
+  document.getElementById('pred-gate').style.display='none';
+  document.getElementById('pred-content').style.display='block';
+  // Load this player's predictions from Sheet on first open
+  loadMyPredictions().then(()=>{
+    buildPredTabs();
+    renderPredRound(ROUNDS[0].id);
+  });
+}
+
+async function loadMyPredictions(){
+  if(STATE.predictions[ME]) return; // already loaded
+  // Fetch via adminGetAll is overkill — we'll read from the sheet
+  // Use a lightweight approach: store predictions locally after saving
+  STATE.predictions[ME] = STATE.predictions[ME] || {};
+}
+
+let activePredRound = ROUNDS[0].id;
+
+function buildPredTabs(){
+  const el=document.getElementById('pred-tabs');
+  el.innerHTML='';
+  ROUNDS.forEach((r,i)=>{
+    const st=STATE.roundStatus[r.id]||'upcoming';
+    const icon=st==='open'?'🟢':st==='locked'?'🔒':'⏳';
+    const btn=document.createElement('button');
+    btn.className='pt'+(i===0?' active':'');
+    btn.textContent=icon+' '+r.label;
+    btn.onclick=()=>{
+      document.querySelectorAll('#pred-tabs .pt').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      activePredRound=r.id;
+      renderPredRound(r.id);
+    };
+    el.appendChild(btn);
+  });
+}
+
+function renderPredRound(roundId){
+  const round=ROUNDS.find(r=>r.id===roundId);
+  const st=STATE.roundStatus[roundId]||'upcoming';
+  const myPreds=(STATE.predictions[ME]||{})[roundId]||{};
+  const el=document.getElementById('pred-body');
+
+  let html=`<div class="card"><div class="flex-bw mb16">
+    <div><div class="card-hd" style="margin-bottom:3px;">${round.label}</div>
+    <div class="muted" style="font-size:.78rem;">${round.sublabel}</div></div>
+    <span class="pill ${st==='open'?'pill-open':st==='locked'?'pill-locked':'pill-up'}">${st==='open'?'Open':st==='locked'?'Locked':'Upcoming'}</span>
+  </div>`;
+
+  if(st==='upcoming'){
+    html+=`<div style="text-align:center;padding:28px;color:var(--nv50);"><span style="font-size:2rem;display:block;margin-bottom:8px;">⏳</span>Not open yet — check back soon!</div>`;
+  } else {
+    const isGroup=round.type==='group';
+    html+=`<p class="muted mb16" style="font-size:.8rem;">${isGroup
+      ? `Pick the result. Correct = <span class="pts-pill">2pts</span>. Add exact score for <span class="pts-pill">+3pts</span> bonus.`
+      : `Knockout — pick who advances. <span class="pts-pill">${round.pts}pts</span> per correct pick. No draws.`}</p>`;
+
+    round.matches.forEach(m=>{
+      const pred=myPreds[m.id]||{};
+      const locked=st==='locked';
+      html+=`<div class="mrow"><div class="mrow-info">
+        <div class="mteams">${m.home} <span style="color:var(--nv50);font-size:.78rem;">vs</span> ${m.away}</div>
+        <span class="mgbadge">${m.group}</span>
+        ${isGroup?`<div class="score-wrap">
+          <input type="number" min="0" max="20" class="sc" id="sh-${m.id}" value="${pred.scoreH??''}" placeholder="?" ${locked?'disabled':''}
+            onchange="savePred('${roundId}','${m.id}','scoreH',this.value)">
+          <span class="sc-sep">–</span>
+          <input type="number" min="0" max="20" class="sc" id="sa-${m.id}" value="${pred.scoreA??''}" placeholder="?" ${locked?'disabled':''}
+            onchange="savePred('${roundId}','${m.id}','scoreA',this.value)">
+          <span class="muted" style="font-size:.7rem;margin-left:5px;">optional exact score</span>
+        </div>`:''}
+      </div>
+      <div class="pred-btns">
+        <button class="pb ${pred.result==='home'?'sel-h':''} ${locked?'locked':''}" onclick="setPredResult('${roundId}','${m.id}','home')">🏠 ${isGroup?'Home':'1'}</button>
+        ${isGroup?`<button class="pb ${pred.result==='draw'?'sel-d':''} ${locked?'locked':''}" onclick="setPredResult('${roundId}','${m.id}','draw')">🤝 Draw</button>`:''}
+        <button class="pb ${pred.result==='away'?'sel-a':''} ${locked?'locked':''}" onclick="setPredResult('${roundId}','${m.id}','away')">✈ ${isGroup?'Away':'2'}</button>
+      </div></div>`;
+    });
+    if(st==='open') html+=`<div class="banner bn-info mt8" style="font-size:.8rem;">💾 Saves automatically as you click.</div>`;
+  }
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+function setPredResult(roundId,matchId,result){
+  if(!STATE.predictions[ME]) STATE.predictions[ME]={};
+  if(!STATE.predictions[ME][roundId]) STATE.predictions[ME][roundId]={};
+  if(!STATE.predictions[ME][roundId][matchId]) STATE.predictions[ME][roundId][matchId]={};
+  STATE.predictions[ME][roundId][matchId].result=result;
+  renderPredRound(roundId);
+  // fire-and-forget save
+  const p=STATE.predictions[ME][roundId][matchId];
+  apiPost({action:'savePrediction',playerKey:ME,roundId,matchId,result,scoreH:p.scoreH||'',scoreA:p.scoreA||''});
+}
+
+function savePred(roundId,matchId,field,val){
+  if(!STATE.predictions[ME]) STATE.predictions[ME]={};
+  if(!STATE.predictions[ME][roundId]) STATE.predictions[ME][roundId]={};
+  if(!STATE.predictions[ME][roundId][matchId]) STATE.predictions[ME][roundId][matchId]={};
+  STATE.predictions[ME][roundId][matchId][field]=val;
+  const p=STATE.predictions[ME][roundId][matchId];
+  apiPost({action:'savePrediction',playerKey:ME,roundId,matchId,
+    result:p.result||'',scoreH:p.scoreH||'',scoreA:p.scoreA||''});
+}
+
+// ══════════════════════════════════════════════════════════
+//  GOLDEN QUESTIONS
+// ══════════════════════════════════════════════════════════
+function renderGoldenView(){
+  if(!ME||!STATE.players[ME]){
+    document.getElementById('golden-gate').style.display='block';
+    document.getElementById('golden-content').style.display='none';
+    return;
+  }
+  document.getElementById('golden-gate').style.display='none';
+  document.getElementById('golden-content').style.display='block';
+  renderGoldenContent();
+}
+
+function renderGoldenContent(){
+  const myGolden=(STATE.goldenAnswers[ME]||{});
+  const el=document.getElementById('golden-content');
+  let html='';
+  GOLDEN_PHASES.forEach(phase=>{
+    const locked=(STATE.goldenPhaseStatus[phase.id]||'open')==='locked';
+    const myPhase=myGolden[phase.id]||{};
+    html+=`<div class="card mb16"><div class="flex-bw mb16">
+      <div class="card-hd" style="margin-bottom:0;">${phase.label}</div>
+      <span class="pill ${locked?'pill-locked':'pill-open'}">${locked?'🔒 Locked':'🟢 Open'}</span>
+    </div>
+    <p class="muted" style="font-size:.78rem;margin-bottom:14px;">📅 ${phase.deadline}</p>`;
+
+    phase.questions.forEach((q,qi)=>{
+      html+=`<div class="gq"><div class="gq-q"><span class="qn">Q${qi+1}.</span>${q.text} <span class="pts-pill">${q.pts}pts</span></div>`;
+      if(q.type==='select'){
+        html+=`<select class="fi" id="gq-${q.id}" ${locked?'disabled':''} onchange="saveGolden('${phase.id}','${q.id}',this.value)">
+          <option value="">— Choose —</option>`;
+        q.options.forEach(o=>html+=`<option value="${o}" ${myPhase[q.id]===o?'selected':''}>${o}</option>`);
+        html+=`</select>`;
+      } else if(q.type==='number'){
+        html+=`<input type="number" min="0" max="999" class="fi" style="max-width:130px;" id="gq-${q.id}"
+          value="${myPhase[q.id]??''}" placeholder="Your number" ${locked?'disabled':''}
+          onchange="saveGolden('${phase.id}','${q.id}',this.value)">`;
+      } else {
+        html+=`<input type="text" class="fi" id="gq-${q.id}"
+          value="${myPhase[q.id]??''}" placeholder="Your answer" ${locked?'disabled':''}
+          oninput="saveGolden('${phase.id}','${q.id}',this.value)">`;
+      }
+      html+=`</div>`;
+    });
+    if(!locked) html+=`<div class="banner bn-info mt8" style="font-size:.8rem;">💾 Saves automatically.</div>`;
+    html+=`</div>`;
+  });
+  el.innerHTML=html;
+}
+
+function saveGolden(phaseId,questionId,answer){
+  if(!STATE.goldenAnswers[ME]) STATE.goldenAnswers[ME]={};
+  if(!STATE.goldenAnswers[ME][phaseId]) STATE.goldenAnswers[ME][phaseId]={};
+  STATE.goldenAnswers[ME][phaseId][questionId]=answer;
+  apiPost({action:'saveGolden',playerKey:ME,phaseId,questionId,answer});
+}
+
+// ══════════════════════════════════════════════════════════
+//  LEADERBOARD
+// ══════════════════════════════════════════════════════════
+async function renderLeaderboard(){
+  const el=document.getElementById('lb-content');
+  el.innerHTML='<div class="banner bn-info"><span class="spinner"></span>Fetching latest standings…</div>';
+  try{
+    const data=await apiGet({action:'getLeaderboard'});
+    STATE.players=data;
+    renderPrizeTable();
+    const players=Object.values(data);
+    if(!players.length){ el.innerHTML='<div style="text-align:center;padding:30px;color:var(--nv50);">No players yet — be the first to register!</div>'; return; }
+    const sorted=[...players].sort((a,b)=>{
+      const aT=(a.pts||0)+(a.goldenPts||0)+(a.triviaBonus||0);
+      const bT=(b.pts||0)+(b.goldenPts||0)+(b.triviaBonus||0);
+      return bT-aT;
+    });
+    const count=players.length, pot=count*10;
+    let html=`<div class="card mb16" style="background:rgba(213,0,87,.07);border-color:rgba(213,0,87,.22);">
+      <div class="flex-bw"><span style="font-size:.83rem;">Total pot</span>
+      <span style="font-family:'DM Serif Display',serif;font-size:1.6rem;color:var(--green);">€${pot}</span></div>
+      <div class="flex-bw mt8"><span class="muted" style="font-size:.76rem;">${count} registered</span>
+      <span class="muted" style="font-size:.76rem;">Surplus → SARI</span></div>
+    </div>
+    <div class="card"><table class="lb-table"><thead><tr>
+      <th>Pos</th><th>Player</th><th style="text-align:right;">Pts</th>
+    </tr></thead><tbody>`;
+    sorted.forEach((p,i)=>{
+      const total=(p.pts||0)+(p.goldenPts||0)+(p.triviaBonus||0);
+      const isLast=i===sorted.length-1&&sorted.length>1;
+      const cls=i===0?'rk1':i===1?'rk2':i===2?'rk3':isLast?'rkl':'';
+      const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':isLast?'🧦':'';
+      html+=`<tr class="${cls}"><td class="rk">${medal||i+1}</td>
+        <td><div class="pname">${p.name}${!p.paid?' <span style="font-size:.68rem;color:var(--nv50);">(⏳)</span>':''}</div>
+        <div style="font-size:.7rem;color:var(--nv50);">Match: ${p.pts||0} · KO: ${p.knockoutPts||0} · Golden: ${p.goldenPts||0} · Trivia: ${p.triviaBonus||0}</div></td>
+        <td class="pts-cell">${total}<span class="pts-sub">🥾 KO: ${p.knockoutPts||0}</span></td>
+      </tr>`;
+    });
+    html+=`</tbody></table></div>`;
+    el.innerHTML=html;
+  } catch(e){
+    el.innerHTML=`<div class="banner bn-err">⚠ Couldn't load leaderboard: ${e.message}</div>`;
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  MY RESULTS
+// ══════════════════════════════════════════════════════════
+function renderMyResultsView(){
+  if(!ME||!STATE.players[ME]){
+    document.getElementById('mr-gate').style.display='block';
+    document.getElementById('mr-content').style.display='none';
+    return;
+  }
+  document.getElementById('mr-gate').style.display='none';
+  document.getElementById('mr-content').style.display='block';
+  renderMyResultsContent();
+}
+
+function renderMyResultsContent(){
+  const player=STATE.players[ME];
+  const myPreds=STATE.predictions[ME]||{};
+  const results=STATE.results||{};
+  const el=document.getElementById('mr-content');
+  const total=(player.pts||0)+(player.goldenPts||0)+(player.triviaBonus||0);
+
+  let html=`<div class="card mb16" style="background:rgba(65,0,153,.15);border-color:rgba(65,0,153,.4);">
+    <div style="font-family:'DM Serif Display',serif;font-size:2rem;color:var(--light-blue);">${total} pts</div>
+    <div class="muted" style="font-size:.8rem;">Match: ${player.pts||0} · KO: ${player.knockoutPts||0} · Golden: ${player.goldenPts||0} · Trivia: ${player.triviaBonus||0}</div>
+  </div>`;
+
+  ROUNDS.forEach(round=>{
+    const rPreds=myPreds[round.id]||{};
+    const rResults=results[round.id]||{};
+    const hasResults=Object.keys(rResults).length>0;
+    if(!hasResults&&STATE.roundStatus[round.id]==='upcoming') return;
+
+    html+=`<div class="card mb16"><div class="card-hd" style="font-size:1rem;">${round.label}</div>`;
+    round.matches.forEach(m=>{
+      const pred=rPreds[m.id]||{};
+      const res=rResults[m.id]||{};
+      const hasPred=!!pred.result, hasRes=!!res.result;
+      let badge='';
+      if(hasPred&&hasRes){
+        if(pred.result===res.result){
+          let pts=round.pts;
+          const exactScore=round.type==='group'&&round.bonusPts>0&&
+            String(pred.scoreH)!==''&&String(pred.scoreH)===String(res.scoreH)&&
+            String(pred.scoreA)!==''&&String(pred.scoreA)===String(res.scoreA);
+          if(exactScore) pts+=round.bonusPts;
+          badge=`<span class="res-badge rb-ok">✅ +${pts}pts${exactScore?' (exact!)':''}</span>`;
+        } else badge=`<span class="res-badge rb-bad">❌ 0pts</span>`;
+      } else if(!hasPred) badge=`<span class="res-badge rb-pend">— no pick</span>`;
+      else badge=`<span class="res-badge rb-pend">⏳ result pending</span>`;
+
+      const pLabel=pred.result?(pred.result==='home'?'🏠 Home':pred.result==='draw'?'🤝 Draw':'✈ Away'):'—';
+      const rLabel=res.result?(res.result==='home'?'🏠 Home':res.result==='draw'?'🤝 Draw':'✈ Away'):'?';
+      const scoreStr=(pred.scoreH!==undefined&&String(pred.scoreH)!=='')?` (${pred.scoreH}–${pred.scoreA})`:'';
+      const resScoreStr=(res.scoreH!==undefined&&String(res.scoreH)!=='')?` (${res.scoreH}–${res.scoreA})`:'';
+
+      html+=`<div class="mrow"><div class="mrow-info">
+        <div class="mteams" style="font-size:.84rem;">${m.home} vs ${m.away}</div>
+        <div class="muted" style="font-size:.73rem;">Your pick: ${pLabel}${scoreStr} ${badge}</div>
+        ${hasRes?`<div class="muted" style="font-size:.73rem;">Result: ${rLabel}${resScoreStr}</div>`:''}
+      </div></div>`;
+    });
+    html+=`</div>`;
+  });
+  el.innerHTML=html;
+}
+
+// ══════════════════════════════════════════════════════════
+//  ADMIN
+// ══════════════════════════════════════════════════════════
+let adminUnlocked=false;
+
+async function adminLogin(){
+  const pw=document.getElementById('adm-pw').value;
+  if(pw!==ADMIN_PASSWORD){
+    const e=document.getElementById('adm-err');
+    e.textContent='Incorrect password.'; e.style.display='flex'; return;
+  }
+  loading(true,'Loading admin data…');
+  try{
+    const data=await apiPost({action:'adminGetAll',password:ADMIN_PASSWORD});
+    if(data.error){ loading(false); alert('Error: '+data.error); return; }
+    STATE.players         = data.players||{};
+    STATE.roundStatus     = data.roundStatus||{};
+    STATE.goldenPhaseStatus = data.goldenPhaseStatus||{};
+    STATE.predictions     = data.predictions||{};
+    STATE.results         = data.results||{};
+    STATE.goldenAnswers   = data.goldenAnswers||{};
+    STATE.triviaBonus     = data.triviaBonus||{};
+    adminUnlocked=true;
+    document.getElementById('admin-lock').style.display='none';
+    document.getElementById('admin-panel').style.display='block';
+    renderAdminPanel();
+    loading(false);
+  } catch(e){ loading(false); alert('Connection error: '+e.message); }
+}
+
+function renderAdminPanel(){
+  renderAdminPlayers();
+  renderAdminRounds();
+  renderAdminResultTabs();
+  renderAdminTrivia();
+}
+
+function renderAdminPlayers(){
+  const el=document.getElementById('adm-players');
+  const players=Object.values(STATE.players);
+  if(!players.length){ el.innerHTML='<p class="muted">No players yet.</p>'; return; }
+  let html=`<table style="width:100%;font-size:.83rem;"><thead><tr>
+    <th style="text-align:left;padding:5px 8px;color:var(--light-blue);font-size:.68rem;text-transform:uppercase;">Name</th>
+    <th style="text-align:left;padding:5px 8px;color:var(--light-blue);font-size:.68rem;text-transform:uppercase;">Slack</th>
+    <th style="text-align:left;padding:5px 8px;color:var(--light-blue);font-size:.68rem;text-transform:uppercase;">Paid</th>
+    <th style="text-align:right;padding:5px 8px;color:var(--light-blue);font-size:.68rem;text-transform:uppercase;">Pts</th>
+  </tr></thead><tbody>`;
+  players.forEach(p=>{
+    const total=(p.pts||0)+(p.goldenPts||0)+(p.triviaBonus||0);
+    html+=`<tr>
+      <td style="padding:7px 8px;">${p.name}</td>
+      <td style="padding:7px 8px;color:var(--nv50);">@${p.slack||'—'}</td>
+      <td style="padding:7px 8px;">
+        <label style="cursor:pointer;display:flex;align-items:center;gap:6px;">
+          <input type="checkbox" ${p.paid?'checked':''} onchange="adminTogglePaid('${p.key}',this.checked)">
+          <span style="color:${p.paid?'var(--green)':'var(--mg50)'};">${p.paid?'✅ Paid':'⏳ Unpaid'}</span>
+        </label>
+      </td>
+      <td style="padding:7px 8px;text-align:right;font-family:'DM Serif Display',serif;color:var(--light-blue);">${total}</td>
+    </tr>`;
+  });
+  html+=`</tbody></table>`;
+  el.innerHTML=html;
+}
+
+async function adminTogglePaid(key,paid){
+  STATE.players[key].paid=paid;
+  renderAdminPlayers();
+  renderPrizeTable();
+  await apiPost({action:'togglePaid',password:ADMIN_PASSWORD,playerKey:key,paid});
+}
+
+function renderAdminRounds(){
+  const el=document.getElementById('adm-rounds');
+  let html='';
+  const allItems=[
+    ...ROUNDS.map(r=>({id:r.id,label:r.label,isGolden:false})),
+    ...GOLDEN_PHASES.map(p=>({id:p.id,label:p.label,isGolden:true})),
+  ];
+  allItems.forEach(item=>{
+    const statusObj=item.isGolden?STATE.goldenPhaseStatus:STATE.roundStatus;
+    const st=statusObj[item.id]||'upcoming';
+    html+=`<div class="flex-bw" style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);">
+      <span style="font-size:.86rem;">${item.label}</span>
+      <div style="display:flex;gap:5px;">
+        <button class="btn btn-sm ${st==='open'?'btn-success':''}" onclick="adminSetStatus('${item.id}',${item.isGolden},'open')">Open</button>
+        <button class="btn btn-sm ${st==='locked'?'btn-primary':''}" onclick="adminSetStatus('${item.id}',${item.isGolden},'locked')">Lock</button>
+        ${!item.isGolden?`<button class="btn btn-sm ${st==='upcoming'?'btn-secondary':''}" onclick="adminSetStatus('${item.id}',${item.isGolden},'upcoming')">Upcoming</button>`:''}
+      </div>
+    </div>`;
+  });
+  el.innerHTML=html;
+}
+
+async function adminSetStatus(id,isGolden,status){
+  if(isGolden) STATE.goldenPhaseStatus[id]=status;
+  else STATE.roundStatus[id]=status;
+  renderAdminRounds();
+  await apiPost({action:'setRoundStatus',password:ADMIN_PASSWORD,roundId:id,status,isGolden});
+}
+
+let adminResRound=ROUNDS[0].id;
+function renderAdminResultTabs(){
+  const el=document.getElementById('adm-res-tabs');
+  el.innerHTML='';
+  ROUNDS.forEach((r,i)=>{
+    const btn=document.createElement('button');
+    btn.className='pt'+(i===0?' active':'');
+    btn.textContent=r.label;
+    btn.onclick=()=>{
+      document.querySelectorAll('#adm-res-tabs .pt').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      adminResRound=r.id;
+      renderAdminResults(r.id);
+    };
+    el.appendChild(btn);
+  });
+  renderAdminResults(ROUNDS[0].id);
+}
+
+function renderAdminResults(roundId){
+  const round=ROUNDS.find(r=>r.id===roundId);
+  const res=STATE.results[roundId]||{};
+  const el=document.getElementById('adm-res-body');
+  let html=`<p class="muted mb16" style="font-size:.8rem;">${round.pts}pts per correct result.${round.bonusPts?` Exact score = +${round.bonusPts}pts bonus.`:''}</p>`;
+  round.matches.forEach(m=>{
+    const r=res[m.id]||{};
+    html+=`<div class="rir">
+      <div class="ml">${m.home} vs ${m.away}</div>
+      <div class="rr-group">`;
+    ['home','draw','away'].forEach(opt=>{
+      if(opt==='draw'&&round.type==='knockout') return;
+      const lbl=opt==='home'?'H-Win':opt==='draw'?'Draw':'A-Win';
+      html+=`<input type="radio" class="rr r-${opt}" name="res-${m.id}" id="res-${m.id}-${opt}" value="${opt}"
+        ${r.result===opt?'checked':''} onchange="adminSaveResult('${roundId}','${m.id}','result','${opt}')">
+        <label class="rrl" for="res-${m.id}-${opt}">${lbl}</label>`;
+    });
+    html+=`</div>`;
+    if(round.type==='group'){
+      html+=`<div style="display:flex;align-items:center;gap:4px;">
+        <input type="number" min="0" max="20" class="sc" value="${r.scoreH??''}" placeholder="H"
+          onchange="adminSaveResult('${roundId}','${m.id}','scoreH',this.value)">
+        <span class="sc-sep">–</span>
+        <input type="number" min="0" max="20" class="sc" value="${r.scoreA??''}" placeholder="A"
+          onchange="adminSaveResult('${roundId}','${m.id}','scoreA',this.value)">
+      </div>`;
+    }
+    html+=`</div>`;
+  });
+  el.innerHTML=html;
+}
+
+async function adminSaveResult(roundId,matchId,field,val){
+  if(!STATE.results[roundId]) STATE.results[roundId]={};
+  if(!STATE.results[roundId][matchId]) STATE.results[roundId][matchId]={};
+  STATE.results[roundId][matchId][field]=val;
+  const r=STATE.results[roundId][matchId];
+  await apiPost({action:'saveResult',password:ADMIN_PASSWORD,roundId,matchId,
+    result:r.result||'',scoreH:r.scoreH||'',scoreA:r.scoreA||''});
+}
+
+async function recalcPoints(){
+  const btn=document.querySelector('button[onclick="recalcPoints()"]');
+  btn.disabled=true; btn.textContent='⏳ Calculating…';
+  const msg=document.getElementById('recalc-msg');
+  msg.style.display='none';
+  try{
+    const res=await apiPost({action:'recalcPoints',password:ADMIN_PASSWORD});
+    if(res.error){ alert('Error: '+res.error); }
+    else {
+      msg.textContent='✅ '+res.message; msg.style.display='flex';
+      // Refresh admin data
+      const data=await apiPost({action:'adminGetAll',password:ADMIN_PASSWORD});
+      STATE.players=data.players||{};
+      renderAdminPlayers();
+      renderPrizeTable();
+    }
+  } catch(e){ alert('Error: '+e.message); }
+  btn.disabled=false; btn.textContent='🔄 Recalculate All Points';
+}
+
+function renderAdminTrivia(){
+  const players=Object.values(STATE.players);
+  const el=document.getElementById('adm-trivia');
+  const weeks=['Week 1','Week 2','Week 3','Week 4 (R32/R16)','Week 5 (QF/SF)','Week 6 (Final)'];
+  let html='';
+  weeks.forEach((w,i)=>{
+    html+=`<div class="rir">
+      <div class="ml">${w} trivia winner</div>
+      <select class="fi" style="max-width:200px;" onchange="adminAwardTrivia(${i},this.value)">
+        <option value="">— Select winner —</option>
+        ${players.map(p=>`<option value="${p.key}" ${(STATE.triviaBonus[i]||'')=== p.key?'selected':''}>${p.name}</option>`).join('')}
+      </select>
+    </div>`;
+  });
+  el.innerHTML=html;
+}
+
+async function adminAwardTrivia(weekIndex,playerKey){
+  STATE.triviaBonus[weekIndex]=playerKey;
+  await apiPost({action:'awardTrivia',password:ADMIN_PASSWORD,weekIndex,playerKey});
+  // Refresh players
+  const data=await apiPost({action:'adminGetAll',password:ADMIN_PASSWORD});
+  STATE.players=data.players||{};
+  renderAdminPlayers();
+}
+
+function clearAdminCache(){
+  if(confirm('Clear local admin cache?')){ localStorage.removeItem('dvwcc_me'); location.reload(); }
+}
+
+// ══════════════════════════════════════════════════════════
+//  BOOT
+// ══════════════════════════════════════════════════════════
+window.addEventListener('load', init);
+</script>
+</body>
+</html>
