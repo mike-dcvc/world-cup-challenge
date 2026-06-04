@@ -475,11 +475,10 @@ async function apiGet(params){
   return res.json();
 }
 async function apiPost(body){
-  const res = await fetch(API_URL, {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify(body),
-  });
+  // Apps Script doesn't support CORS preflight (OPTIONS), so we route
+  // all writes through GET with a JSON-encoded payload parameter.
+  const url = API_URL + '?' + new URLSearchParams({payload: JSON.stringify(body)});
+  const res = await fetch(url);
   return res.json();
 }
 function loading(show, msg='Loading…'){
