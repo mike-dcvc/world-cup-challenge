@@ -860,7 +860,7 @@ async function renderLeaderboard(){
       const total=(p.pts||0)+(p.goldenPts||0)+(p.triviaBonus||0);
       const isLast=i===sorted.length-1&&sorted.length>1;
       const cls=i===0?'rk1':i===1?'rk2':i===2?'rk3':isLast?'rkl':'';
-      const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':isLast?'🧦':'';
+      const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':isLast?'🥄':'';
       html+=`<tr class="${cls}"><td class="rk">${medal||i+1}</td>
         <td><div class="pname">${p.name}</div>
         <div style="font-size:.7rem;color:var(--nv50);">Match: ${p.pts||0} · KO: ${p.knockoutPts||0} · Golden: ${p.goldenPts||0} · Trivia: ${p.triviaBonus||0}</div></td>
