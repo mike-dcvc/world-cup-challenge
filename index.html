@@ -632,7 +632,7 @@ function showConfirmed(player){
 function renderPrizeTable(){
   const count = Object.values(STATE.players).filter(p=>p.paid).length;
   const total = Object.keys(STATE.players).length;
-  const pot   = total * 10;
+  const pot   = count * 10;
   const rows  = [
     {emoji:'🥇',label:'1st Place',pct:40},
     {emoji:'🥈',label:'2nd Place',pct:20},
@@ -641,7 +641,7 @@ function renderPrizeTable(){
     {emoji:'🧦',label:'Wooden Spoon (last place) — special socks!',pct:0,fixed:'Special socks 🧦'},
     {emoji:'🌍',label:'Sports Against Racism Ireland (remainder)',pct:0,fixed:'Remainder'},
   ];
-  let html=`<p class="muted mb16" style="font-size:.8rem;">Pot: <strong style="color:var(--green)">€${pot}</strong> (${total} registered · ${count} paid)</p>`;
+  let html=`<p class="muted mb16" style="font-size:.8rem;">Pot: <strong style="color:var(--green)">€${pot}</strong></p>`;
   rows.forEach(r=>{
     const amt = r.pct ? `€${Math.floor(pot*r.pct/100)}` : r.fixed;
     html+=`<div class="prize-row"><div class="prize-lbl"><span class="p-emoji">${r.emoji}</span>${r.label}</div>
@@ -847,12 +847,11 @@ async function renderLeaderboard(){
       const bT=(b.pts||0)+(b.goldenPts||0)+(b.triviaBonus||0);
       return bT-aT;
     });
-    const count=players.length, pot=count*10;
+    const paid=players.filter(p=>p.paid).length, count=players.length, pot=paid*10;
     let html=`<div class="card mb16" style="background:rgba(213,0,87,.07);border-color:rgba(213,0,87,.22);">
       <div class="flex-bw"><span style="font-size:.83rem;">Total pot</span>
       <span style="font-family:'DM Serif Display',serif;font-size:1.6rem;color:var(--green);">€${pot}</span></div>
-      <div class="flex-bw mt8"><span class="muted" style="font-size:.76rem;">${count} registered</span>
-      <span class="muted" style="font-size:.76rem;">Surplus → SARI</span></div>
+      <div class="flex-bw mt8"><span class="muted" style="font-size:.76rem;">Surplus → SARI</span></div>
     </div>
     <div class="card"><table class="lb-table"><thead><tr>
       <th>Pos</th><th>Player</th><th style="text-align:right;">Pts</th>
