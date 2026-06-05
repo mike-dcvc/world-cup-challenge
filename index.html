@@ -227,11 +227,12 @@ select.fi option{background:var(--navy);color:#fff;}
         <h4>💳 Pay your €10 entry fee via Revolut</h4>
         <p>After registering, send <strong>€10</strong> to Mike on Revolut — tap the link below, add your name as the reference, and you're done. Your predictions count straight away, but your entry is only fully confirmed once Mike marks your payment. You'll see ✅ on the leaderboard when you're confirmed.</p>
         <a href="https://revolut.me/mikesrandall" target="_blank" style="display:inline-block;margin-top:10px;padding:10px 20px;background:var(--green);color:var(--navy);border-radius:8px;font-weight:700;font-size:.88rem;text-decoration:none;letter-spacing:.03em;">💸 Pay €10 via Revolut →</a>
+        <p style="font-size:.78rem;color:rgba(255,255,255,.5);margin-top:12px;line-height:1.6;">*Payment is entirely optional. If you'd prefer not to pay — for any reason — you're still very welcome to take part and compete for the full tournament. If you finish in a prize position without having paid in, your prize will be donated to Sports Against Racism Ireland instead.</p>
       </div>
       <div class="card mt16">
         <div class="card-hd">🏆 Prize Structure</div>
         <div id="prize-table"></div>
-        <p class="muted mt8" style="font-size:.76rem;">Any remaining funds donated to <strong style="color:var(--light-blue)">Sports Against Racism Ireland</strong>.</p>
+        <p class="muted mt8" style="font-size:.76rem;">Any remaining funds donated to <strong style="color:var(--light-blue)">Sports Against Racism Ireland</strong>. Prize positions reached by non-paying participants are also donated to SARI.</p>
       </div>
       <div class="card mt16">
         <div class="card-hd">📖 How Points Work</div>
@@ -245,6 +246,12 @@ select.fi option{background:var(--navy);color:#fff;}
           Up to <span class="pts-pill">5 pts</span> each — no football knowledge needed!</p><br>
           <p><strong style="color:var(--light-blue)">Weekly Slack Trivia:</strong> <span class="pts-pill">1 pt</span> per week</p>
         </div>
+      </div>
+
+      <div class="card mt16" style="background:rgba(0,192,139,0.07);border-color:rgba(0,192,139,0.25);">
+        <div class="card-hd" style="color:var(--green);">🤝 Everyone is welcome</div>
+        <p style="font-size:.86rem;line-height:1.65;color:rgba(255,255,255,.75);">Payment is *entirely optional*. If you'd prefer not to pay — for any reason at all — you're still very welcome to take part and your predictions count the same as everyone else's.<br><br>
+        If you finish in a prize position without having paid in, your prize will be donated to <strong style="color:var(--light-blue)">Sports Against Racism Ireland</strong> on your behalf.</p>
       </div>
     </div>
     <div id="enter-confirmed" style="display:none;">
@@ -856,7 +863,7 @@ async function renderLeaderboard(){
       const cls=i===0?'rk1':i===1?'rk2':i===2?'rk3':isLast?'rkl':'';
       const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':isLast?'🧦':'';
       html+=`<tr class="${cls}"><td class="rk">${medal||i+1}</td>
-        <td><div class="pname">${p.name}${!p.paid?' <span style="font-size:.68rem;color:var(--nv50);">(⏳)</span>':''}</div>
+        <td><div class="pname">${p.name}</div>
         <div style="font-size:.7rem;color:var(--nv50);">Match: ${p.pts||0} · KO: ${p.knockoutPts||0} · Golden: ${p.goldenPts||0} · Trivia: ${p.triviaBonus||0}</div></td>
         <td class="pts-cell">${total}<span class="pts-sub">🥾 KO: ${p.knockoutPts||0}</span></td>
       </tr>`;
