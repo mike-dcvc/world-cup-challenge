@@ -337,9 +337,26 @@ select.fi option{background:var(--navy);color:#fff;}
         <button class="btn btn-success mt16" onclick="recalcPoints()">🔄 Recalculate All Points</button>
         <div id="recalc-msg" style="display:none;" class="banner bn-ok mt8"></div>
       </div>
-      <div class="card mt16"><div class="card-hd">🏅 Weekly Trivia Points</div>
-        <p class="muted mb16">Award 1pt to each week's Slack trivia winner.</p>
-        <div id="adm-trivia"></div>
+      <div class="card mt16">
+        <div class="card-hd">🏅 Bonus Points</div>
+        <p class="muted mb16">Award bonus points to any player at any time — for trivia, special mentions, or anything else. All awards are logged and can be removed.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:flex-end;">
+          <div style="flex:2;min-width:140px;">
+            <label class="fl">Player</label>
+            <select class="fi" id="bonus-player"><option value="">— Select player —</option></select>
+          </div>
+          <div style="flex:0 0 80px;">
+            <label class="fl">Points</label>
+            <input class="fi" type="number" id="bonus-pts" placeholder="e.g. 1" min="-99" max="99" style="text-align:center;">
+          </div>
+          <div style="flex:3;min-width:160px;">
+            <label class="fl">Reason</label>
+            <input class="fi" type="text" id="bonus-reason" placeholder="e.g. Week 3 Slack trivia">
+          </div>
+          <button class="btn btn-success btn-sm" style="flex:0 0 auto;height:40px;margin-top:auto;" onclick="adminAwardBonus()">Award →</button>
+        </div>
+        <div id="bonus-msg" style="display:none;" class="banner bn-ok mb16"></div>
+        <div id="bonus-log"></div>
       </div>
       <div class="card mt16">
         <div class="card-hd">🏟 Knockout Team Names</div>
@@ -479,7 +496,7 @@ const GOLDEN_PHASES = [
 let STATE = {
   players:{}, roundStatus:{}, goldenPhaseStatus:{},
   predictions:{}, results:{}, goldenAnswers:{}, triviaBonus:{},
-  knockoutTeams:{},
+  knockoutTeams:{}, bonuses:[],
   adminData: null,
 };
 let ME = localStorage.getItem('dvwcc_me') || null; // playerKey
@@ -964,6 +981,7 @@ async function adminLogin(){
     STATE.goldenAnswers     = data.goldenAnswers||{};
     STATE.triviaBonus       = data.triviaBonus||{};
     STATE.knockoutTeams     = data.knockoutTeams||{};
+    STATE.bonuses           = data.bonuses||[];
     adminUnlocked=true;
     document.getElementById('admin-lock').style.display='none';
     document.getElementById('admin-panel').style.display='block';
@@ -976,7 +994,7 @@ function renderAdminPanel(){
   renderAdminPlayers();
   renderAdminRounds();
   renderAdminResultTabs();
-  renderAdminTrivia();
+  renderAdminBonusPanel();
   renderAdminKoTabs();
 }
 
@@ -1124,31 +1142,95 @@ async function recalcPoints(){
   btn.disabled=false; btn.textContent='🔄 Recalculate All Points';
 }
 
-function renderAdminTrivia(){
-  const players=Object.values(STATE.players);
-  const el=document.getElementById('adm-trivia');
-  const weeks=['Week 1','Week 2','Week 3','Week 4 (R32/R16)','Week 5 (QF/SF)','Week 6 (Final)'];
-  let html='';
-  weeks.forEach((w,i)=>{
-    html+=`<div class="rir">
-      <div class="ml">${w} trivia winner</div>
-      <select class="fi" style="max-width:200px;" onchange="adminAwardTrivia(${i},this.value)">
-        <option value="">— Select winner —</option>
-        ${players.map(p=>`<option value="${p.key}" ${(STATE.triviaBonus[i]||'')=== p.key?'selected':''}>${p.name}</option>`).join('')}
-      </select>
-    </div>`;
-  });
-  el.innerHTML=html;
+function renderAdminBonusPanel(){
+  const sel = document.getElementById('bonus-player');
+  if (!sel) return;
+  const players = Object.values(STATE.players).sort((a,b)=>a.name.localeCompare(b.name));
+  sel.innerHTML = '<option value="">— Select player —</option>' +
+    players.map(p=>`<option value="${p.key}">${p.name}</option>`).join('');
+  renderBonusLog();
 }
 
-async function adminAwardTrivia(weekIndex,playerKey){
-  STATE.triviaBonus[weekIndex]=playerKey;
-  await apiPost({action:'awardTrivia',password:ADMIN_PASSWORD,weekIndex,playerKey});
-  // Refresh players
-  const data=await apiPost({action:'adminGetAll',password:ADMIN_PASSWORD});
-  STATE.players=data.players||{};
-  renderAdminPlayers();
+function renderBonusLog(){
+  const el = document.getElementById('bonus-log');
+  if (!el) return;
+  const bonuses = [...STATE.bonuses].reverse();
+  if (!bonuses.length) {
+    el.innerHTML = '<p class="muted" style="font-size:.8rem;">No bonuses awarded yet.</p>';
+    return;
+  }
+  let html = `<table style="width:100%;font-size:.82rem;border-collapse:collapse;">
+    <thead><tr>
+      <th style="text-align:left;padding:5px 8px;color:var(--light-blue);font-size:.68rem;text-transform:uppercase;">Player</th>
+      <th style="text-align:left;padding:5px 8px;color:var(--light-blue);font-size:.68rem;text-transform:uppercase;">Reason</th>
+      <th style="text-align:center;padding:5px 8px;color:var(--light-blue);font-size:.68rem;text-transform:uppercase;">Pts</th>
+      <th style="text-align:left;padding:5px 8px;color:var(--light-blue);font-size:.68rem;text-transform:uppercase;">Date</th>
+      <th style="padding:5px 8px;"></th>
+    </tr></thead><tbody>`;
+  bonuses.forEach(b => {
+    const player = STATE.players[b.playerKey];
+    const name = player ? player.name : b.playerKey;
+    const date = b.timestamp ? new Date(b.timestamp).toLocaleDateString('en-IE',{day:'numeric',month:'short'}) : '—';
+    const ptsColor = b.pts > 0 ? 'var(--green)' : 'var(--magenta)';
+    html += `<tr style="border-bottom:1px solid rgba(255,255,255,.05);">
+      <td style="padding:7px 8px;font-weight:700;">${name}</td>
+      <td style="padding:7px 8px;color:rgba(255,255,255,.6);">${b.reason||'—'}</td>
+      <td style="padding:7px 8px;text-align:center;font-family:'DM Serif Display',serif;color:${ptsColor};">${b.pts>0?'+':''}${b.pts}</td>
+      <td style="padding:7px 8px;color:var(--nv50);font-size:.75rem;">${date}</td>
+      <td style="padding:7px 8px;text-align:right;">
+        <button class="btn btn-sm" style="background:rgba(213,0,87,.15);border:1px solid var(--magenta);color:var(--mg50);padding:3px 8px;font-size:.68rem;"
+          onclick="adminDeleteBonus('${b.id}','${b.playerKey}',${b.pts})">✕</button>
+      </td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  el.innerHTML = html;
 }
+
+async function adminAwardBonus(){
+  const playerKey = document.getElementById('bonus-player').value;
+  const pts       = Number(document.getElementById('bonus-pts').value);
+  const reason    = document.getElementById('bonus-reason').value.trim();
+  const msgEl     = document.getElementById('bonus-msg');
+  if (!playerKey) { alert('Please select a player.'); return; }
+  if (!pts || isNaN(pts)) { alert('Please enter a points value.'); return; }
+  const btn = document.querySelector('button[onclick="adminAwardBonus()"]');
+  btn.disabled = true; btn.textContent = '⏳';
+  try {
+    const res = await apiPost({ action:'awardBonus', password:ADMIN_PASSWORD, playerKey, pts, reason });
+    if (res.error) { alert('Error: ' + res.error); }
+    else {
+      if (!STATE.players[playerKey].triviaBonus) STATE.players[playerKey].triviaBonus = 0;
+      STATE.players[playerKey].triviaBonus += pts;
+      STATE.bonuses.push({ id: res.id, playerKey, pts, reason, timestamp: new Date().toISOString() });
+      document.getElementById('bonus-player').value = '';
+      document.getElementById('bonus-pts').value = '';
+      document.getElementById('bonus-reason').value = '';
+      msgEl.textContent = `✅ ${pts>0?'+':''}${pts} pts awarded to ${STATE.players[playerKey].name}${reason?' — '+reason:''}`;
+      msgEl.style.display = 'flex';
+      setTimeout(()=>msgEl.style.display='none', 4000);
+      renderAdminPlayers();
+      renderBonusLog();
+    }
+  } catch(e) { alert('Error: ' + e.message); }
+  btn.disabled = false; btn.textContent = 'Award →';
+}
+
+async function adminDeleteBonus(id, playerKey, pts){
+  if (!confirm(`Remove this bonus (${pts>0?'+':''}${pts} pts)?`)) return;
+  try {
+    const res = await apiPost({ action:'deleteBonus', password:ADMIN_PASSWORD, id, playerKey, pts });
+    if (res.error) { alert('Error: ' + res.error); }
+    else {
+      STATE.bonuses = STATE.bonuses.filter(b=>b.id!==id);
+      if (STATE.players[playerKey]) STATE.players[playerKey].triviaBonus -= Number(pts);
+      renderAdminPlayers();
+      renderBonusLog();
+    }
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+function renderAdminTrivia(){} // legacy stub
 
 // ── KNOCKOUT TEAM NAME EDITOR ──────────────────────────────
 const KO_ROUNDS = [
