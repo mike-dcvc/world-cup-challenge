@@ -334,7 +334,10 @@ select.fi option{background:var(--navy);color:#fff;}
         <p class="muted mb16">Enter actual results — then click Recalculate to update all scores.</p>
         <div class="phase-tabs" id="adm-res-tabs"></div>
         <div id="adm-res-body"></div>
-        <button class="btn btn-success mt16" onclick="recalcPoints()">🔄 Recalculate All Points</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;">
+          <button class="btn btn-secondary" onclick="fixBlankResults()">🔧 Auto-fix blank results from scores</button>
+          <button class="btn btn-success" onclick="recalcPoints()">🔄 Recalculate All Points</button>
+        </div>
         <div id="recalc-msg" style="display:none;" class="banner bn-ok mt8"></div>
       </div>
       <div class="card mt16">
@@ -1094,8 +1097,11 @@ function renderAdminResults(roundId){
     ['home','draw','away'].forEach(opt=>{
       if(opt==='draw'&&round.type==='knockout') return;
       const lbl=opt==='home'?'H-Win':opt==='draw'?'Draw':'A-Win';
+      // Check against stored result OR inferred result from scores
+      const effectiveResult = r.result || inferResultFromScores(r.scoreH, r.scoreA);
+      const isChecked = effectiveResult === opt;
       html+=`<input type="radio" class="rr r-${opt}" name="res-${m.id}" id="res-${m.id}-${opt}" value="${opt}"
-        ${r.result===opt?'checked':''} onchange="adminSaveResult('${roundId}','${m.id}','result','${opt}')">
+        ${isChecked?'checked':''} onclick="adminSaveResult('${roundId}','${m.id}','result','${opt}')">
         <label class="rrl" for="res-${m.id}-${opt}">${lbl}</label>`;
     });
     html+=`</div>`;
@@ -1113,13 +1119,69 @@ function renderAdminResults(roundId){
   el.innerHTML=html;
 }
 
-async function adminSaveResult(roundId,matchId,field,val){
-  if(!STATE.results[roundId]) STATE.results[roundId]={};
-  if(!STATE.results[roundId][matchId]) STATE.results[roundId][matchId]={};
-  STATE.results[roundId][matchId][field]=val;
-  const r=STATE.results[roundId][matchId];
-  await apiPost({action:'saveResult',password:ADMIN_PASSWORD,roundId,matchId,
-    result:r.result||'',scoreH:r.scoreH||'',scoreA:r.scoreA||''});
+function inferResultFromScores(scoreH, scoreA) {
+  const h = parseInt(scoreH), a = parseInt(scoreA);
+  if (!isNaN(h) && !isNaN(a)) {
+    if (h > a) return 'home';
+    if (a > h) return 'away';
+    return 'draw';
+  }
+  return '';
+}
+
+async function adminSaveResult(roundId, matchId, field, val) {
+  if (!STATE.results[roundId]) STATE.results[roundId] = {};
+  if (!STATE.results[roundId][matchId]) STATE.results[roundId][matchId] = {};
+  STATE.results[roundId][matchId][field] = val;
+  const r = STATE.results[roundId][matchId];
+  // Auto-infer result from scores if not explicitly set
+  const result = r.result || inferResultFromScores(r.scoreH, r.scoreA);
+  if (result && !r.result) {
+    r.result = result;
+  }
+  await apiPost({
+    action: 'saveResult', password: ADMIN_PASSWORD,
+    roundId, matchId,
+    result: r.result || '',
+    scoreH: r.scoreH !== undefined ? r.scoreH : '',
+    scoreA: r.scoreA !== undefined ? r.scoreA : '',
+  });
+  // Re-render to show updated radio button state
+  renderAdminResults(roundId);
+}
+
+async function fixBlankResults(){
+  // For every match in STATE.results where result is blank but scores exist,
+  // infer and save the result
+  const btn = document.querySelector('button[onclick="fixBlankResults()"]');
+  btn.disabled = true; btn.textContent = '⏳ Fixing…';
+  let fixed = 0;
+  for (const roundId of Object.keys(STATE.results)) {
+    for (const matchId of Object.keys(STATE.results[roundId])) {
+      const r = STATE.results[roundId][matchId];
+      if (!r.result && (r.scoreH !== '' && r.scoreA !== '')) {
+        const inferred = inferResultFromScores(r.scoreH, r.scoreA);
+        if (inferred) {
+          r.result = inferred;
+          await apiPost({
+            action: 'saveResult', password: ADMIN_PASSWORD,
+            roundId, matchId,
+            result: inferred,
+            scoreH: r.scoreH,
+            scoreA: r.scoreA,
+          });
+          fixed++;
+        }
+      }
+    }
+  }
+  btn.disabled = false; btn.textContent = '🔧 Auto-fix blank results from scores';
+  const msg = document.getElementById('recalc-msg');
+  msg.textContent = fixed > 0
+    ? `✅ Fixed ${fixed} blank result${fixed>1?'s':''} — now click Recalculate All Points`
+    : '✅ No blank results found';
+  msg.style.display = 'flex';
+  renderAdminResults(adminResRound);
 }
 
 async function recalcPoints(){
